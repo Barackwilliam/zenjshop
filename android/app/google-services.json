@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "46318592762",
+    "project_id": "zenjshop-803ca",
+    "storage_bucket": "zenjshop-803ca.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:46318592762:android:242856e1c2fab705fc9f43",
+        "android_client_info": {
+          "package_name": "com.example.zenjshop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARew00XOGQ8--njKEQApbycId72jiA1kE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
