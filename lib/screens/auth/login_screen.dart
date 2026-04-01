@@ -67,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen>
     setState(() => _isLoading = false);
 
     if (user != null) {
-      if (!mounted) return;
+      if (!mounted) { return; }
       switch (user.role) {
         case 'admin':
           Navigator.pushReplacementNamed(context, '/admin');
@@ -82,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen>
           Navigator.pushReplacementNamed(context, '/customer');
       }
     } else {
-      if (!mounted) return;
+      if (!mounted) { return; }
       _showSnack(Lang.get('login_error'), isError: true);
     }
   }
@@ -230,7 +230,7 @@ class _LoginScreenState extends State<LoginScreen>
                         borderRadius: BorderRadius.circular(18),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withOpacity(0.4),
+                            color: AppColors.primary.withValues(alpha: 0.4),
                             blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),

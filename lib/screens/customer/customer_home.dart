@@ -134,7 +134,7 @@ class _CustomerHomeState extends State<CustomerHome>
 
   void _logout() async {
     await _authService.logout();
-    if (!mounted) return;
+    if (!mounted) { return; }
     Navigator.pushReplacementNamed(context, '/welcome');
   }
 
@@ -195,7 +195,7 @@ class _CustomerHomeState extends State<CustomerHome>
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.4),
+                      color: AppColors.primary.withValues(alpha: 0.4),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -347,7 +347,7 @@ class _CustomerHomeState extends State<CustomerHome>
               isGradient
                   ? [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
+                      color: AppColors.primary.withValues(alpha: 0.3),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -399,7 +399,7 @@ class _CustomerHomeState extends State<CustomerHome>
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.08),
+              color: AppColors.primary.withValues(alpha: 0.08),
               blurRadius: 20,
               offset: const Offset(0, 4),
             ),
@@ -486,7 +486,7 @@ class _CustomerHomeState extends State<CustomerHome>
                 boxShadow: [
                   BoxShadow(
                     color: (banner['gradient'] as List<Color>).first
-                        .withOpacity(0.4),
+                        .withValues(alpha: 0.4),
                     blurRadius: 25,
                     offset: const Offset(0, 10),
                   ),
@@ -502,7 +502,7 @@ class _CustomerHomeState extends State<CustomerHome>
                       height: 160,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.08),
+                        color: Colors.white.withValues(alpha: 0.08),
                       ),
                     ),
                   ),
@@ -514,7 +514,7 @@ class _CustomerHomeState extends State<CustomerHome>
                       height: 120,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.05),
+                        color: Colors.white.withValues(alpha: 0.05),
                       ),
                     ),
                   ),
@@ -547,7 +547,7 @@ class _CustomerHomeState extends State<CustomerHome>
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(50),
                           ),
                           child: Text(
@@ -574,7 +574,7 @@ class _CustomerHomeState extends State<CustomerHome>
                           banner['sub'] as String,
                           style: GoogleFonts.poppins(
                             fontSize: 12,
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -703,7 +703,7 @@ class _CustomerHomeState extends State<CustomerHome>
                               isSelected
                                   ? [
                                     BoxShadow(
-                                      color: color.withOpacity(0.4),
+                                      color: color.withValues(alpha: 0.4),
                                       blurRadius: 15,
                                       offset: const Offset(0, 6),
                                     ),
@@ -829,7 +829,7 @@ class _CustomerHomeState extends State<CustomerHome>
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDark ? 0.2 : 0.06),
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.06),
               blurRadius: 15,
               offset: const Offset(0, 4),
             ),
@@ -860,7 +860,7 @@ class _CustomerHomeState extends State<CustomerHome>
                       height: 70,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.1),
                       ),
                     ),
                   ),
@@ -889,7 +889,7 @@ class _CustomerHomeState extends State<CustomerHome>
                     Center(
                       child: Icon(
                         Icons.store_rounded,
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         size: 36,
                       ),
                     ),
@@ -902,7 +902,7 @@ class _CustomerHomeState extends State<CustomerHome>
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(50),
                       ),
                       child: Row(
@@ -985,7 +985,7 @@ class _CustomerHomeState extends State<CustomerHome>
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(50),
                     ),
                     child: Text(
@@ -1060,7 +1060,7 @@ class _CustomerHomeState extends State<CustomerHome>
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
+                          color: AppColors.primary.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -1177,7 +1177,7 @@ class _CustomerHomeState extends State<CustomerHome>
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDark ? 0.2 : 0.06),
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.06),
               blurRadius: 15,
               offset: const Offset(0, 4),
             ),
@@ -1195,7 +1195,7 @@ class _CustomerHomeState extends State<CustomerHome>
                 height: 130,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [color.withOpacity(0.15), color.withOpacity(0.05)],
+                    colors: [color.withValues(alpha: 0.15), color.withValues(alpha: 0.05)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -1213,7 +1213,7 @@ class _CustomerHomeState extends State<CustomerHome>
                             (c, u) => Center(
                               child: Icon(
                                 Icons.shopping_bag_outlined,
-                                color: color.withOpacity(0.4),
+                                color: color.withValues(alpha: 0.4),
                                 size: 50,
                               ),
                             ),
@@ -1221,7 +1221,7 @@ class _CustomerHomeState extends State<CustomerHome>
                             (c, u, e) => Center(
                               child: Icon(
                                 Icons.shopping_bag_outlined,
-                                color: color.withOpacity(0.5),
+                                color: color.withValues(alpha: 0.5),
                                 size: 50,
                               ),
                             ),
@@ -1230,7 +1230,7 @@ class _CustomerHomeState extends State<CustomerHome>
                       Center(
                         child: Icon(
                           Icons.shopping_bag_outlined,
-                          color: color.withOpacity(0.5),
+                          color: color.withValues(alpha: 0.5),
                           size: 50,
                         ),
                       ),
@@ -1243,8 +1243,8 @@ class _CustomerHomeState extends State<CustomerHome>
                         decoration: BoxDecoration(
                           color:
                               isDark
-                                  ? AppColors.bgCard.withOpacity(0.9)
-                                  : Colors.white.withOpacity(0.9),
+                                  ? AppColors.bgCard.withValues(alpha: 0.9)
+                                  : Colors.white.withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Icon(
@@ -1263,7 +1263,7 @@ class _CustomerHomeState extends State<CustomerHome>
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.9),
+                          color: color.withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(50),
                         ),
                         child: Text(
@@ -1385,7 +1385,7 @@ class _CustomerHomeState extends State<CustomerHome>
                             borderRadius: BorderRadius.circular(11),
                             boxShadow: [
                               BoxShadow(
-                                color: color.withOpacity(0.4),
+                                color: color.withValues(alpha: 0.4),
                                 blurRadius: 8,
                                 offset: const Offset(0, 3),
                               ),
@@ -1433,10 +1433,10 @@ class _CustomerHomeState extends State<CustomerHome>
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(50),
                   border: Border.all(
-                    color: AppColors.primary.withOpacity(0.3),
+                    color: AppColors.primary.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -1530,7 +1530,7 @@ class _CustomerHomeState extends State<CustomerHome>
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.15 : 0.05),
+            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.05),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -1562,7 +1562,7 @@ class _CustomerHomeState extends State<CustomerHome>
                       height: 100,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.08),
+                        color: Colors.white.withValues(alpha: 0.08),
                       ),
                     ),
                   ),
@@ -1576,7 +1576,7 @@ class _CustomerHomeState extends State<CustomerHome>
                           (c, u, e) => Center(
                             child: Icon(
                               Icons.store_rounded,
-                              color: Colors.white.withOpacity(0.8),
+                              color: Colors.white.withValues(alpha: 0.8),
                               size: 40,
                             ),
                           ),
@@ -1585,7 +1585,7 @@ class _CustomerHomeState extends State<CustomerHome>
                     Center(
                       child: Icon(
                         Icons.store_rounded,
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                         size: 40,
                       ),
                     ),
@@ -1598,7 +1598,7 @@ class _CustomerHomeState extends State<CustomerHome>
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(50),
                       ),
                       child: Row(
@@ -1664,7 +1664,7 @@ class _CustomerHomeState extends State<CustomerHome>
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: gradient.first.withOpacity(0.1),
+                              color: gradient.first.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(50),
                             ),
                             child: Text(
@@ -1735,7 +1735,7 @@ class _CustomerHomeState extends State<CustomerHome>
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -1774,7 +1774,7 @@ class _CustomerHomeState extends State<CustomerHome>
                   borderRadius: BorderRadius.circular(18),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.4),
+                      color: AppColors.primary.withValues(alpha: 0.4),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
                     ),
@@ -1831,10 +1831,10 @@ class _CustomerHomeState extends State<CustomerHome>
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.error.withOpacity(0.1),
+                    color: AppColors.error.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(50),
                     border: Border.all(
-                      color: AppColors.error.withOpacity(0.3),
+                      color: AppColors.error.withValues(alpha: 0.3),
                       width: 1,
                     ),
                   ),
@@ -1890,7 +1890,7 @@ class _CustomerHomeState extends State<CustomerHome>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(isDark ? 0.15 : 0.05),
+                      color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
@@ -1904,7 +1904,7 @@ class _CustomerHomeState extends State<CustomerHome>
                         width: 70,
                         height: 70,
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.1),
+                          color: color.withValues(alpha: 0.1),
                         ),
                         child:
                             item.product.productImage != null &&
@@ -2052,7 +2052,7 @@ class _CustomerHomeState extends State<CustomerHome>
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, -4),
               ),
@@ -2104,7 +2104,7 @@ class _CustomerHomeState extends State<CustomerHome>
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.4),
+                        color: AppColors.primary.withValues(alpha: 0.4),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -2161,7 +2161,7 @@ class _CustomerHomeState extends State<CustomerHome>
                       width: 90,
                       height: 90,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.white, width: 3),
                       ),
@@ -2204,7 +2204,7 @@ class _CustomerHomeState extends State<CustomerHome>
                   _userEmail,
                   style: GoogleFonts.poppins(
                     fontSize: 12,
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -2217,7 +2217,7 @@ class _CustomerHomeState extends State<CustomerHome>
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(50),
                       ),
                       child: Row(
@@ -2247,7 +2247,7 @@ class _CustomerHomeState extends State<CustomerHome>
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
+                        color: Colors.white.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(50),
                       ),
                       child: Row(
@@ -2428,10 +2428,10 @@ class _CustomerHomeState extends State<CustomerHome>
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     decoration: BoxDecoration(
-                      color: AppColors.error.withOpacity(0.1),
+                      color: AppColors.error.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
-                        color: AppColors.error.withOpacity(0.3),
+                        color: AppColors.error.withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),
@@ -2531,7 +2531,7 @@ class _CustomerHomeState extends State<CustomerHome>
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.12),
+              color: AppColors.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: AppColors.primary, size: 22),
@@ -2578,7 +2578,7 @@ class _CustomerHomeState extends State<CustomerHome>
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.12),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),

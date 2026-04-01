@@ -83,7 +83,7 @@ class _SignupScreenState extends State<SignupScreen>
     setState(() => _isLoading = false);
 
     if (user != null) {
-      if (!mounted) return;
+      if (!mounted) { return; }
       switch (user.role) {
         case 'shop_owner':
           Navigator.pushReplacementNamed(context, '/shop_owner');
@@ -95,7 +95,7 @@ class _SignupScreenState extends State<SignupScreen>
           Navigator.pushReplacementNamed(context, '/customer');
       }
     } else {
-      if (!mounted) return;
+      if (!mounted) { return; }
       _showSnack(Lang.get('signup_error'), isError: true);
     }
   }
@@ -344,7 +344,7 @@ class _SignupScreenState extends State<SignupScreen>
                         borderRadius: BorderRadius.circular(18),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withOpacity(0.4),
+                            color: AppColors.primary.withValues(alpha: 0.4),
                             blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),

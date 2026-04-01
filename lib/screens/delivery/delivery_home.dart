@@ -30,7 +30,7 @@ class _DeliveryHomeState extends State<DeliveryHome> {
 
   void _logout() async {
     await _authService.logout();
-    if (!mounted) return;
+    if (!mounted) { return; }
     Navigator.pushReplacementNamed(context, '/welcome');
   }
 
@@ -98,10 +98,10 @@ class _DeliveryHomeState extends State<DeliveryHome> {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: AppColors.error.withOpacity(0.15),
+                    color: AppColors.error.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: AppColors.error.withOpacity(0.3),
+                      color: AppColors.error.withValues(alpha: 0.3),
                       width: 1,
                     ),
                   ),
@@ -297,7 +297,7 @@ class _DeliveryHomeState extends State<DeliveryHome> {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.success.withOpacity(0.3),
+                  color: AppColors.success.withValues(alpha: 0.3),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -342,7 +342,7 @@ class _DeliveryHomeState extends State<DeliveryHome> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.15),
+                  color: AppColors.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(50),
                 ),
                 child: Text(
@@ -365,10 +365,10 @@ class _DeliveryHomeState extends State<DeliveryHome> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                color: AppColors.error.withOpacity(0.1),
+                color: AppColors.error.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: AppColors.error.withOpacity(0.3),
+                  color: AppColors.error.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -424,7 +424,7 @@ class _DeliveryHomeState extends State<DeliveryHome> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -488,7 +488,7 @@ class _DeliveryHomeState extends State<DeliveryHome> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.15),
+                  color: AppColors.success.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(50),
                 ),
                 child: Text(
@@ -568,7 +568,7 @@ class _DeliveryHomeState extends State<DeliveryHome> {
                   order.orderId, _currentUserId ?? '');
               await _firestoreService.updateOrderStatus(
                   order.orderId, 'picked_up');
-              if (!mounted) return;
+              if (!mounted) { return; }
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
@@ -596,7 +596,7 @@ class _DeliveryHomeState extends State<DeliveryHome> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.success.withOpacity(0.3),
+                    color: AppColors.success.withValues(alpha: 0.3),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -657,10 +657,10 @@ class _DeliveryHomeState extends State<DeliveryHome> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.15),
+                  color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(50),
                   border: Border.all(
-                    color: statusColor.withOpacity(0.3),
+                    color: statusColor.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -802,9 +802,9 @@ class _DeliveryHomeState extends State<DeliveryHome> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
+          color: color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: color.withOpacity(0.3), width: 1),
+          border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
         ),
         child: Center(
           child: Text(
@@ -830,8 +830,8 @@ class _DeliveryHomeState extends State<DeliveryHome> {
             size: 60,
             color:
                 isDark
-                    ? AppColors.textGrey.withOpacity(0.3)
-                    : AppColors.textDarkGrey.withOpacity(0.3),
+                    ? AppColors.textGrey.withValues(alpha: 0.3)
+                    : AppColors.textDarkGrey.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 16),
           Text(
@@ -870,7 +870,7 @@ class _DeliveryHomeState extends State<DeliveryHome> {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.12),
+              color: AppColors.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: AppColors.primary, size: 20),

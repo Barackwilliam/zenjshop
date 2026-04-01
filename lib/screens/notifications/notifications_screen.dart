@@ -55,10 +55,10 @@ class NotificationsScreen extends StatelessWidget {
               margin: const EdgeInsets.only(right: 16),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(50),
                 border: Border.all(
-                    color: AppColors.primary.withOpacity(0.3), width: 1),
+                    color: AppColors.primary.withValues(alpha: 0.3), width: 1),
               ),
               child: Text(
                 Lang.isSwahili ? 'Soma Zote' : 'Read All',
@@ -89,7 +89,7 @@ class NotificationsScreen extends StatelessWidget {
                     width: 90,
                     height: 90,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -137,13 +137,13 @@ class NotificationsScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        AppColors.primary.withOpacity(0.15),
-                        AppColors.secondary.withOpacity(0.1),
+                        AppColors.primary.withValues(alpha: 0.15),
+                        AppColors.secondary.withValues(alpha: 0.1),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                        color: AppColors.primary.withOpacity(0.3), width: 1),
+                        color: AppColors.primary.withValues(alpha: 0.3), width: 1),
                   ),
                   child: Row(
                     children: [
@@ -186,15 +186,15 @@ class NotificationsScreen extends StatelessWidget {
                           color: notif.isRead
                               ? (isDark ? AppColors.bgCard : AppColors.bgCardLight)
                               : (isDark
-                                  ? AppColors.primary.withOpacity(0.1)
-                                  : AppColors.primary.withOpacity(0.05)),
+                                  ? AppColors.primary.withValues(alpha: 0.1)
+                                  : AppColors.primary.withValues(alpha: 0.05)),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: notif.isRead
                                 ? (isDark
                                     ? const Color(0xFF2A3158)
                                     : const Color(0xFFDDE0FF))
-                                : AppColors.primary.withOpacity(0.3),
+                                : AppColors.primary.withValues(alpha: 0.3),
                             width: 1,
                           ),
                         ),
@@ -205,7 +205,7 @@ class NotificationsScreen extends StatelessWidget {
                               width: 46,
                               height: 46,
                               decoration: BoxDecoration(
-                                color: _getNotifColor(notif.type).withOpacity(0.15),
+                                color: _getNotifColor(notif.type).withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               child: Icon(

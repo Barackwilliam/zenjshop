@@ -30,7 +30,7 @@ class _AdminHomeState extends State<AdminHome> {
 
   void _logout() async {
     await _authService.logout();
-    if (!mounted) return;
+    if (!mounted) { return; }
     Navigator.pushReplacementNamed(context, '/welcome');
   }
 
@@ -180,10 +180,10 @@ class _AdminHomeState extends State<AdminHome> {
                       width: 42,
                       height: 42,
                       decoration: BoxDecoration(
-                        color: AppColors.error.withOpacity(0.15),
+                        color: AppColors.error.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: AppColors.error.withOpacity(0.3),
+                          color: AppColors.error.withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),
@@ -561,7 +561,7 @@ class _AdminHomeState extends State<AdminHome> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
+                  color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, color: color, size: 20),
@@ -612,7 +612,7 @@ class _AdminHomeState extends State<AdminHome> {
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: gradient.colors.first.withOpacity(0.3),
+              color: gradient.colors.first.withValues(alpha: 0.3),
               blurRadius: 15,
               offset: const Offset(0, 6),
             ),
@@ -667,7 +667,7 @@ class _AdminHomeState extends State<AdminHome> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.15),
+              color: AppColors.primary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(
@@ -713,7 +713,7 @@ class _AdminHomeState extends State<AdminHome> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.15),
+                  color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(50),
                 ),
                 child: Text(
@@ -766,10 +766,10 @@ class _AdminHomeState extends State<AdminHome> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.15),
+                  color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(50),
                   border: Border.all(
-                    color: statusColor.withOpacity(0.3),
+                    color: statusColor.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -861,7 +861,7 @@ class _AdminHomeState extends State<AdminHome> {
                 width: 46,
                 height: 46,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.15),
+                  color: AppColors.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -899,7 +899,7 @@ class _AdminHomeState extends State<AdminHome> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.15),
+                  color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(50),
                 ),
                 child: Text(
@@ -985,9 +985,9 @@ class _AdminHomeState extends State<AdminHome> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.15),
+                  color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(50),
-                  border: Border.all(color: statusColor.withOpacity(0.3), width: 1),
+                  border: Border.all(color: statusColor.withValues(alpha: 0.3), width: 1),
                 ),
                 child: Text(statusLabel.toUpperCase(),
                   style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w700, color: statusColor)),
@@ -1065,9 +1065,9 @@ class _AdminHomeState extends State<AdminHome> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
+          color: color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: color.withOpacity(0.3), width: 1),
+          border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
         ),
         child: Center(
           child: Text(
@@ -1090,7 +1090,7 @@ class _AdminHomeState extends State<AdminHome> {
         children: [
           Icon(
             Icons.inbox_rounded,
-            color: AppColors.textGrey.withOpacity(0.4),
+            color: AppColors.textGrey.withValues(alpha: 0.4),
             size: 60,
           ),
           const SizedBox(height: 16),
@@ -1223,7 +1223,7 @@ class _AdminHomeState extends State<AdminHome> {
                     ),
                     GestureDetector(
                       onTap: () async {
-                        if (nameController.text.isEmpty) return;
+                        if (nameController.text.isEmpty) { return; }
                         final shopId =
                             DateTime.now().millisecondsSinceEpoch.toString();
                         await _firestoreService.addShop(
@@ -1238,7 +1238,7 @@ class _AdminHomeState extends State<AdminHome> {
                             createdAt: DateTime.now(),
                           ),
                         );
-                        if (!context.mounted) return;
+                        if (!context.mounted) { return; }
                         Navigator.pop(context);
                       },
                       child: Container(

@@ -123,8 +123,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
                           colors: [
-                            AppColors.primary.withOpacity(0.3),
-                            AppColors.primary.withOpacity(0.0),
+                            AppColors.primary.withValues(alpha: 0.3),
+                            AppColors.primary.withValues(alpha: 0.0),
                           ],
                         ),
                       ),
@@ -148,8 +148,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
                           colors: [
-                            AppColors.secondary.withOpacity(0.25),
-                            AppColors.secondary.withOpacity(0.0),
+                            AppColors.secondary.withValues(alpha: 0.25),
+                            AppColors.secondary.withValues(alpha: 0.0),
                           ],
                         ),
                       ),
@@ -167,7 +167,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 builder: (context, child) {
                   return Transform.translate(
                     offset: Offset(0, _floatAnim.value),
-                    child: _buildDot(8, AppColors.gold.withOpacity(0.6)),
+                    child: _buildDot(8, AppColors.gold.withValues(alpha: 0.6)),
                   );
                 },
               ),
@@ -180,7 +180,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 builder: (context, child) {
                   return Transform.translate(
                     offset: Offset(0, -_floatAnim.value),
-                    child: _buildDot(5, AppColors.primary.withOpacity(0.8)),
+                    child: _buildDot(5, AppColors.primary.withValues(alpha: 0.8)),
                   );
                 },
               ),
@@ -193,7 +193,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 builder: (context, child) {
                   return Transform.translate(
                     offset: Offset(_floatAnim.value * 0.5, _floatAnim.value),
-                    child: _buildDot(6, AppColors.secondary.withOpacity(0.7)),
+                    child: _buildDot(6, AppColors.secondary.withValues(alpha: 0.7)),
                   );
                 },
               ),
@@ -230,7 +230,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 borderRadius: BorderRadius.circular(32),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.primary.withOpacity(0.5),
+                                    color: AppColors.primary.withValues(alpha: 0.5),
                                     blurRadius: 30,
                                     spreadRadius: 5,
                                     offset: const Offset(0, 10),
@@ -286,13 +286,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [
-                                    AppColors.primary.withOpacity(0.2),
-                                    AppColors.secondary.withOpacity(0.2),
+                                    AppColors.primary.withValues(alpha: 0.2),
+                                    AppColors.secondary.withValues(alpha: 0.2),
                                   ],
                                 ),
                                 borderRadius: BorderRadius.circular(50),
                                 border: Border.all(
-                                  color: AppColors.primary.withOpacity(0.4),
+                                  color: AppColors.primary.withValues(alpha: 0.4),
                                   width: 1,
                                 ),
                               ),
@@ -359,7 +359,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 borderRadius: BorderRadius.circular(18),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.primary.withOpacity(0.4),
+                                    color: AppColors.primary.withValues(alpha: 0.4),
                                     blurRadius: 20,
                                     offset: const Offset(0, 8),
                                   ),

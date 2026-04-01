@@ -51,8 +51,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              color.withOpacity(0.2),
-                              color.withOpacity(0.05),
+                              color.withValues(alpha: 0.2),
+                              color.withValues(alpha: 0.05),
                             ],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
@@ -68,7 +68,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       (c, u) => Center(
                                         child: Icon(
                                           Icons.shopping_bag_outlined,
-                                          color: color.withOpacity(0.4),
+                                          color: color.withValues(alpha: 0.4),
                                           size: 100,
                                         ),
                                       ),
@@ -76,7 +76,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       (c, u, e) => Center(
                                         child: Icon(
                                           Icons.shopping_bag_outlined,
-                                          color: color.withOpacity(0.4),
+                                          color: color.withValues(alpha: 0.4),
                                           size: 100,
                                         ),
                                       ),
@@ -84,7 +84,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 : Center(
                                   child: Icon(
                                     Icons.shopping_bag_outlined,
-                                    color: color.withOpacity(0.4),
+                                    color: color.withValues(alpha: 0.4),
                                     size: 100,
                                   ),
                                 ),
@@ -104,8 +104,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   decoration: BoxDecoration(
                                     color:
                                         isDark
-                                            ? AppColors.bgCard.withOpacity(0.9)
-                                            : Colors.white.withOpacity(0.9),
+                                            ? AppColors.bgCard.withValues(alpha: 0.9)
+                                            : Colors.white.withValues(alpha: 0.9),
                                     borderRadius: BorderRadius.circular(13),
                                   ),
                                   child: Icon(
@@ -129,8 +129,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   decoration: BoxDecoration(
                                     color:
                                         isDark
-                                            ? AppColors.bgCard.withOpacity(0.9)
-                                            : Colors.white.withOpacity(0.9),
+                                            ? AppColors.bgCard.withValues(alpha: 0.9)
+                                            : Colors.white.withValues(alpha: 0.9),
                                     borderRadius: BorderRadius.circular(13),
                                   ),
                                   child: Icon(
@@ -162,7 +162,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: color.withOpacity(0.15),
+                            color: color.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(50),
                           ),
                           child: Text(
@@ -351,7 +351,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   borderRadius: BorderRadius.circular(13),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: color.withOpacity(0.4),
+                                      color: color.withValues(alpha: 0.4),
                                       blurRadius: 10,
                                       offset: const Offset(0, 4),
                                     ),
@@ -472,12 +472,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 height: 58,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [color, color.withOpacity(0.7)],
+                    colors: [color, color.withValues(alpha: 0.7)],
                   ),
                   borderRadius: BorderRadius.circular(18),
                   boxShadow: [
                     BoxShadow(
-                      color: color.withOpacity(0.4),
+                      color: color.withValues(alpha: 0.4),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
                     ),
@@ -522,7 +522,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.1),
+            color: AppColors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: AppColors.primary, size: 20),

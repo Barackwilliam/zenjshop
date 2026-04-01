@@ -9,7 +9,7 @@ import '../../services/firestore_service.dart';
 import '../../models/shop_model.dart';
 import '../../models/product_model.dart';
 import '../../models/order_model.dart';
-import '../chat/chat_screen.dart';
+
 import '../notifications/notifications_screen.dart';
 
 class ShopOwnerHome extends StatefulWidget {
@@ -33,7 +33,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
 
   void _logout() async {
     await _authService.logout();
-    if (!mounted) return;
+    if (!mounted) { return; }
     Navigator.pushReplacementNamed(context, '/welcome');
   }
 
@@ -110,10 +110,10 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                           width: 42,
                           height: 42,
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.1),
+                            color: AppColors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                                color: AppColors.primary.withOpacity(0.3),
+                                color: AppColors.primary.withValues(alpha: 0.3),
                                 width: 1),
                           ),
                           child: Stack(
@@ -148,10 +148,10 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                       width: 42,
                       height: 42,
                       decoration: BoxDecoration(
-                        color: AppColors.error.withOpacity(0.15),
+                        color: AppColors.error.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: AppColors.error.withOpacity(0.3),
+                          color: AppColors.error.withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),
@@ -451,7 +451,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.secondary.withOpacity(0.3),
+                  color: AppColors.secondary.withValues(alpha: 0.3),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -499,7 +499,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.15),
+                  color: AppColors.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(50),
                 ),
                 child: Text(
@@ -535,10 +535,10 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                color: AppColors.error.withOpacity(0.1),
+                color: AppColors.error.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: AppColors.error.withOpacity(0.3),
+                  color: AppColors.error.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -591,7 +591,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -639,7 +639,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: gradient.colors.first.withOpacity(0.3),
+              color: gradient.colors.first.withValues(alpha: 0.3),
               blurRadius: 15,
               offset: const Offset(0, 6),
             ),
@@ -725,7 +725,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.15),
+                  color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(50),
                 ),
                 child: Text(
@@ -747,10 +747,10 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 10),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                    color: AppColors.primary.withOpacity(0.3), width: 1),
+                    color: AppColors.primary.withValues(alpha: 0.3), width: 1),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -811,7 +811,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.secondary.withOpacity(0.15),
+              color: AppColors.secondary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.shopping_bag_outlined,
@@ -849,8 +849,8 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: product.isAvailable
-                    ? AppColors.success.withOpacity(0.15)
-                    : AppColors.error.withOpacity(0.15),
+                    ? AppColors.success.withValues(alpha: 0.15)
+                    : AppColors.error.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(50),
               ),
               child: Text(
@@ -873,7 +873,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
               width: 30,
               height: 30,
               decoration: BoxDecoration(
-                color: AppColors.error.withOpacity(0.1),
+                color: AppColors.error.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(Icons.delete_outline_rounded,
@@ -908,7 +908,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.15),
+              color: AppColors.primary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.receipt_rounded,
@@ -942,7 +942,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.15),
+              color: statusColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(50),
             ),
             child: Text(
@@ -996,10 +996,10 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.15),
+                  color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(50),
                   border: Border.all(
-                      color: statusColor.withOpacity(0.3), width: 1),
+                      color: statusColor.withValues(alpha: 0.3), width: 1),
                 ),
                 child: Text(
                   order.orderStatus.toUpperCase(),
@@ -1079,8 +1079,8 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
           Icon(
             Icons.inbox_rounded,
             color: isDark
-                ? AppColors.textGrey.withOpacity(0.3)
-                : AppColors.textDarkGrey.withOpacity(0.3),
+                ? AppColors.textGrey.withValues(alpha: 0.3)
+                : AppColors.textDarkGrey.withValues(alpha: 0.3),
             size: 60,
           ),
           const SizedBox(height: 16),
@@ -1120,7 +1120,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.12),
+              color: AppColors.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: AppColors.primary, size: 20),
@@ -1224,14 +1224,14 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
           GestureDetector(
             onTap: () async {
               await _firestoreService.deleteProduct(product.productId);
-              if (!ctx.mounted) return;
+              if (!ctx.mounted) { return; }
               Navigator.pop(ctx);
             },
             child: Container(
               padding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: AppColors.error.withOpacity(0.15),
+                color: AppColors.error.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -1368,7 +1368,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
             ),
             GestureDetector(
               onTap: () async {
-                if (nameController.text.isEmpty) return;
+                if (nameController.text.isEmpty) { return; }
                 final shopId =
                     DateTime.now().millisecondsSinceEpoch.toString();
                 await _firestoreService.addShop(
@@ -1383,7 +1383,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                     createdAt: DateTime.now(),
                   ),
                 );
-                if (!context.mounted) return;
+                if (!context.mounted) { return; }
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -1559,7 +1559,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
             GestureDetector(
               onTap: () async {
                 if (nameController.text.isEmpty ||
-                    priceController.text.isEmpty) return;
+                    priceController.text.isEmpty) { return; }
                 final productId =
                     DateTime.now().millisecondsSinceEpoch.toString();
                 await _firestoreService.addProduct(
@@ -1575,7 +1575,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                     createdAt: DateTime.now(),
                   ),
                 );
-                if (!context.mounted) return;
+                if (!context.mounted) { return; }
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
