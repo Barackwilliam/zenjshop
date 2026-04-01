@@ -29,7 +29,6 @@ class _CustomerHomeState extends State<CustomerHome>
   final _firestoreService = FirestoreService();
   final _searchController = TextEditingController();
   late AnimationController _bannerController;
-  late Animation<double> _bannerAnim;
   int _selectedIndex = 0;
   int _selectedCategory = 0;
   String _searchQuery = '';
@@ -99,7 +98,6 @@ class _CustomerHomeState extends State<CustomerHome>
       vsync: this,
       duration: const Duration(seconds: 4),
     )..repeat();
-    _bannerAnim = Tween<double>(begin: 0, end: 1).animate(_bannerController);
     _loadUserData();
     Future.doWhile(() async {
       await Future.delayed(const Duration(seconds: 3));

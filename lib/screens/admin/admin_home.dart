@@ -6,7 +6,6 @@ import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../../models/shop_model.dart';
 import '../../models/order_model.dart';
-import '../../models/user_model.dart';
 import '../notifications/notifications_screen.dart';
 
 class AdminHome extends StatefulWidget {
@@ -21,7 +20,6 @@ class _AdminHomeState extends State<AdminHome> {
   final _authService = AuthService();
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = [];
 
   @override
   void initState() {
