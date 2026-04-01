@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.zenjshop.app"
+    namespace = "com.example.zenjshop"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
@@ -20,7 +20,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.zenjshop.app"
+        applicationId = "com.example.zenjshop"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
