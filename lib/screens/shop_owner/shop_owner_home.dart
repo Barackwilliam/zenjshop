@@ -11,6 +11,7 @@ import '../../models/product_model.dart';
 import '../../models/order_model.dart';
 
 import '../notifications/notifications_screen.dart';
+import '../../services/cloudinary_service.dart';
 
 class ShopOwnerHome extends StatefulWidget {
   const ShopOwnerHome({super.key});
@@ -25,6 +26,9 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
   int _selectedIndex = 0;
   String? _currentUserId;
 
+  // Variable iliyokuwa inasababisha error
+  String? productImageUrl;
+
   @override
   void initState() {
     super.initState();
@@ -33,7 +37,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
 
   void _logout() async {
     await _authService.logout();
-    if (!mounted) { return; }
+    if (!mounted) return;
     Navigator.pushReplacementNamed(context, '/welcome');
   }
 
@@ -45,13 +49,14 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
     return Scaffold(
       backgroundColor: isDark ? AppColors.bgDark : AppColors.bgLight,
       body: SafeArea(
-        child: _selectedIndex == 0
-            ? _buildDashboard(isDark)
-            : _selectedIndex == 1
+        child:
+            _selectedIndex == 0
+                ? _buildDashboard(isDark)
+                : _selectedIndex == 1
                 ? _buildShopsTab(isDark)
                 : _selectedIndex == 2
-                    ? _buildOrdersTab(isDark)
-                    : _buildProfileTab(isDark, themeProvider),
+                ? _buildOrdersTab(isDark)
+                : _buildProfileTab(isDark, themeProvider),
       ),
       bottomNavigationBar: _buildBottomNav(isDark),
     );
@@ -76,13 +81,15 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                     Lang.isSwahili ? 'Habari,' : 'Hello,',
                     style: GoogleFonts.poppins(
                       fontSize: 13,
-                      color: isDark ? AppColors.textGrey : AppColors.textDarkGrey,
+                      color:
+                          isDark ? AppColors.textGrey : AppColors.textDarkGrey,
                     ),
                   ),
                   ShaderMask(
-                    shaderCallback: (bounds) => const LinearGradient(
-                      colors: [AppColors.primary, AppColors.secondary],
-                    ).createShader(bounds),
+                    shaderCallback:
+                        (bounds) => const LinearGradient(
+                          colors: [AppColors.primary, AppColors.secondary],
+                        ).createShader(bounds),
                     child: Text(
                       Lang.isSwahili ? 'Duka Langu' : 'My Shop',
                       style: GoogleFonts.poppins(
@@ -96,16 +103,20 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
               ),
               Row(
                 children: [
-                  // Notification button na badge ya unread count
                   StreamBuilder<int>(
                     stream: _firestoreService.getUnreadNotificationsCount(
-                        _currentUserId ?? ''),
+                      _currentUserId ?? '',
+                    ),
                     builder: (context, snapshot) {
                       final count = snapshot.data ?? 0;
                       return GestureDetector(
-                        onTap: () => Navigator.push(context,
-                            MaterialPageRoute(
-                                builder: (_) => const NotificationsScreen())),
+                        onTap:
+                            () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const NotificationsScreen(),
+                              ),
+                            ),
                         child: Container(
                           width: 42,
                           height: 42,
@@ -113,14 +124,18 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                             color: AppColors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                                color: AppColors.primary.withValues(alpha: 0.3),
-                                width: 1),
+                              color: AppColors.primary.withValues(alpha: 0.3),
+                              width: 1,
+                            ),
                           ),
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
-                              const Icon(Icons.notifications_outlined,
-                                  color: AppColors.primary, size: 20),
+                              const Icon(
+                                Icons.notifications_outlined,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
                               if (count > 0)
                                 Positioned(
                                   top: 8,
@@ -141,7 +156,6 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                     },
                   ),
                   const SizedBox(width: 10),
-                  // Logout button
                   GestureDetector(
                     onTap: _logout,
                     child: Container(
@@ -155,8 +169,11 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                           width: 1,
                         ),
                       ),
-                      child: const Icon(Icons.logout_rounded,
-                          color: AppColors.error, size: 20),
+                      child: const Icon(
+                        Icons.logout_rounded,
+                        color: AppColors.error,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ],
@@ -166,7 +183,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
 
           const SizedBox(height: 24),
 
-          // Stats — inatumia maduka ya owner na orders za maduka yake
+          // Stats
           StreamBuilder<List<ShopModel>>(
             stream: _firestoreService.getMyShops(_currentUserId ?? ''),
             builder: (context, shopSnapshot) {
@@ -264,7 +281,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
 
           const SizedBox(height: 24),
 
-          // Recent Orders — za maduka ya owner tu
+          // Recent Orders
           Text(
             Lang.isSwahili ? 'Maagizo ya Hivi Karibuni' : 'Recent Orders',
             style: GoogleFonts.poppins(
@@ -285,17 +302,14 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                 builder: (context, snapshot) {
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return _buildEmptyState(
-                      Lang.isSwahili
-                          ? 'Hakuna maagizo bado'
-                          : 'No orders yet',
+                      Lang.isSwahili ? 'Hakuna maagizo bado' : 'No orders yet',
                       isDark,
                     );
                   }
                   final orders = snapshot.data!.take(5).toList();
                   return Column(
-                    children: orders
-                        .map((o) => _buildOrderTile(o, isDark))
-                        .toList(),
+                    children:
+                        orders.map((o) => _buildOrderTile(o, isDark)).toList(),
                   );
                 },
               );
@@ -327,7 +341,9 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                 onTap: () => _showAddShopDialog(isDark),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 10),
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     gradient: AppColors.primaryGradient,
                     borderRadius: BorderRadius.circular(12),
@@ -357,8 +373,8 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
-                    child:
-                        CircularProgressIndicator(color: AppColors.primary));
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                );
               }
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return _buildEmptyState(
@@ -371,10 +387,9 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
               return ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  final shop = snapshot.data![index];
-                  return _buildShopTile(shop, isDark);
-                },
+                itemBuilder:
+                    (context, index) =>
+                        _buildShopTile(snapshot.data![index], isDark),
               );
             },
           ),
@@ -409,23 +424,23 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
-                        child: CircularProgressIndicator(
-                            color: AppColors.primary));
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
+                    );
                   }
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return _buildEmptyState(
-                      Lang.isSwahili
-                          ? 'Hakuna maagizo bado'
-                          : 'No orders yet',
+                      Lang.isSwahili ? 'Hakuna maagizo bado' : 'No orders yet',
                       isDark,
                     );
                   }
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     itemCount: snapshot.data!.length,
-                    itemBuilder: (context, index) {
-                      return _buildOrderCard(snapshot.data![index], isDark);
-                    },
+                    itemBuilder:
+                        (context, index) =>
+                            _buildOrderCard(snapshot.data![index], isDark),
                   );
                 },
               );
@@ -457,8 +472,11 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                 ),
               ],
             ),
-            child: const Icon(Icons.store_rounded,
-                color: Colors.white, size: 44),
+            child: const Icon(
+              Icons.store_rounded,
+              color: Colors.white,
+              size: 44,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
@@ -496,8 +514,10 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
             trailing: GestureDetector(
               onTap: () => setState(() => Lang.toggle()),
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(50),
@@ -518,17 +538,22 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
             title: Lang.isSwahili ? 'Arifa' : 'Notifications',
             isDark: isDark,
             trailing: GestureDetector(
-              onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const NotificationsScreen())),
-              child: const Icon(Icons.arrow_forward_ios_rounded,
-                  color: AppColors.primary, size: 16),
+              onTap:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const NotificationsScreen(),
+                    ),
+                  ),
+              child: const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: AppColors.primary,
+                size: 16,
+              ),
             ),
           ),
 
           const SizedBox(height: 10),
-
           GestureDetector(
             onTap: _logout,
             child: Container(
@@ -545,8 +570,11 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.logout_rounded,
-                      color: AppColors.error, size: 20),
+                  const Icon(
+                    Icons.logout_rounded,
+                    color: AppColors.error,
+                    size: 20,
+                  ),
                   const SizedBox(width: 10),
                   Text(
                     Lang.get('logout'),
@@ -565,8 +593,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
     );
   }
 
-  // ==================== WIDGETS ====================
-
+  // ==================== HELPER WIDGETS ====================
   Widget _buildStatCard({
     required String title,
     required String value,
@@ -692,8 +719,11 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                   gradient: AppColors.primaryGradient,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(Icons.store_rounded,
-                    color: Colors.white, size: 26),
+                child: const Icon(
+                  Icons.store_rounded,
+                  color: Colors.white,
+                  size: 26,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -713,17 +743,20 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                       shop.category,
                       style: GoogleFonts.poppins(
                         fontSize: 12,
-                        color: isDark
-                            ? AppColors.textGrey
-                            : AppColors.textDarkGrey,
+                        color:
+                            isDark
+                                ? AppColors.textGrey
+                                : AppColors.textDarkGrey,
                       ),
                     ),
                   ],
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(50),
@@ -740,7 +773,66 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
             ],
           ),
           const SizedBox(height: 12),
-          // Add Product Button
+          GestureDetector(
+            onTap: () async {
+              final file = await CloudinaryService.pickImage();
+              if (file == null) return;
+              final url = await CloudinaryService.uploadImage(file);
+              if (url != null) {
+                await _firestoreService.updateShopImage(shop.shopId, url);
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      Lang.isSwahili
+                          ? 'Picha ya duka imepakiwa!'
+                          : 'Shop image uploaded!',
+                    ),
+                    backgroundColor: AppColors.success,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    margin: const EdgeInsets.all(16),
+                  ),
+                );
+              }
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.secondary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: AppColors.secondary.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.camera_alt_rounded,
+                    color: AppColors.secondary,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    Lang.isSwahili
+                        ? 'Pakia Picha ya Duka'
+                        : 'Upload Shop Image',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.secondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
           GestureDetector(
             onTap: () => _showAddProductDialog(shop.shopId, isDark),
             child: Container(
@@ -750,13 +842,18 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                 color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.3), width: 1),
+                  color: AppColors.primary.withValues(alpha: 0.3),
+                  width: 1,
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.add_rounded,
-                      color: AppColors.primary, size: 18),
+                  const Icon(
+                    Icons.add_rounded,
+                    color: AppColors.primary,
+                    size: 18,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     Lang.isSwahili ? 'Ongeza Bidhaa' : 'Add Product',
@@ -771,7 +868,6 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
             ),
           ),
           const SizedBox(height: 10),
-          // Products List na delete button
           StreamBuilder<List<ProductModel>>(
             stream: _firestoreService.getShopProducts(shop.shopId),
             builder: (context, snapshot) {
@@ -780,15 +876,15 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                   Lang.isSwahili ? 'Hakuna bidhaa bado' : 'No products yet',
                   style: GoogleFonts.poppins(
                     fontSize: 12,
-                    color:
-                        isDark ? AppColors.textGrey : AppColors.textDarkGrey,
+                    color: isDark ? AppColors.textGrey : AppColors.textDarkGrey,
                   ),
                 );
               }
               return Column(
-                children: snapshot.data!
-                    .map((p) => _buildProductTile(p, isDark))
-                    .toList(),
+                children:
+                    snapshot.data!
+                        .map((p) => _buildProductTile(p, isDark))
+                        .toList(),
               );
             },
           ),
@@ -814,8 +910,11 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
               color: AppColors.secondary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.shopping_bag_outlined,
-                color: AppColors.secondary, size: 18),
+            child: const Icon(
+              Icons.shopping_bag_outlined,
+              color: AppColors.secondary,
+              size: 18,
+            ),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -841,16 +940,19 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
               ],
             ),
           ),
-          // Toggle availability
           GestureDetector(
-            onTap: () => _firestoreService.updateProductAvailability(
-                product.productId, !product.isAvailable),
+            onTap:
+                () => _firestoreService.updateProductAvailability(
+                  product.productId,
+                  !product.isAvailable,
+                ),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: product.isAvailable
-                    ? AppColors.success.withValues(alpha: 0.15)
-                    : AppColors.error.withValues(alpha: 0.15),
+                color:
+                    product.isAvailable
+                        ? AppColors.success.withValues(alpha: 0.15)
+                        : AppColors.error.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(50),
               ),
               child: Text(
@@ -858,15 +960,13 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                 style: GoogleFonts.poppins(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
-                  color: product.isAvailable
-                      ? AppColors.success
-                      : AppColors.error,
+                  color:
+                      product.isAvailable ? AppColors.success : AppColors.error,
                 ),
               ),
             ),
           ),
           const SizedBox(width: 6),
-          // Delete product
           GestureDetector(
             onTap: () => _confirmDeleteProduct(product, isDark),
             child: Container(
@@ -876,8 +976,11 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                 color: AppColors.error.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.delete_outline_rounded,
-                  color: AppColors.error, size: 16),
+              child: const Icon(
+                Icons.delete_outline_rounded,
+                color: AppColors.error,
+                size: 16,
+              ),
             ),
           ),
         ],
@@ -911,8 +1014,11 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
               color: AppColors.primary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.receipt_rounded,
-                color: AppColors.primary, size: 20),
+            child: const Icon(
+              Icons.receipt_rounded,
+              color: AppColors.primary,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -931,9 +1037,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                   'TSh ${order.totalAmount.toStringAsFixed(0)}',
                   style: GoogleFonts.poppins(
                     fontSize: 12,
-                    color: isDark
-                        ? AppColors.textGrey
-                        : AppColors.textDarkGrey,
+                    color: isDark ? AppColors.textGrey : AppColors.textDarkGrey,
                   ),
                 ),
               ],
@@ -993,13 +1097,17 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(50),
                   border: Border.all(
-                      color: statusColor.withValues(alpha: 0.3), width: 1),
+                    color: statusColor.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
                 ),
                 child: Text(
                   order.orderStatus.toUpperCase(),
@@ -1015,16 +1123,17 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.payments_outlined,
-                  color: AppColors.textGrey, size: 14),
+              const Icon(
+                Icons.payments_outlined,
+                color: AppColors.textGrey,
+                size: 14,
+              ),
               const SizedBox(width: 6),
               Text(
                 'TSh ${order.totalAmount.toStringAsFixed(0)} • ${order.paymentMethod.toUpperCase()}',
                 style: GoogleFonts.poppins(
                   fontSize: 12,
-                  color: isDark
-                      ? AppColors.textGrey
-                      : AppColors.textDarkGrey,
+                  color: isDark ? AppColors.textGrey : AppColors.textDarkGrey,
                 ),
               ),
             ],
@@ -1032,17 +1141,18 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
           const SizedBox(height: 6),
           Row(
             children: [
-              const Icon(Icons.location_on_outlined,
-                  color: AppColors.secondary, size: 14),
+              const Icon(
+                Icons.location_on_outlined,
+                color: AppColors.secondary,
+                size: 14,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   order.deliveryAddress,
                   style: GoogleFonts.poppins(
                     fontSize: 12,
-                    color: isDark
-                        ? AppColors.textGrey
-                        : AppColors.textDarkGrey,
+                    color: isDark ? AppColors.textGrey : AppColors.textDarkGrey,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1050,7 +1160,6 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
               ),
             ],
           ),
-          // Items ya order
           if (order.items.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
@@ -1078,9 +1187,10 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
         children: [
           Icon(
             Icons.inbox_rounded,
-            color: isDark
-                ? AppColors.textGrey.withValues(alpha: 0.3)
-                : AppColors.textDarkGrey.withValues(alpha: 0.3),
+            color:
+                isDark
+                    ? AppColors.textGrey.withValues(alpha: 0.3)
+                    : AppColors.textDarkGrey.withValues(alpha: 0.3),
             size: 60,
           ),
           const SizedBox(height: 16),
@@ -1162,7 +1272,9 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
         unselectedItemColor:
             isDark ? AppColors.textGrey : AppColors.textDarkGrey,
         selectedLabelStyle: GoogleFonts.poppins(
-            fontSize: 11, fontWeight: FontWeight.w600),
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
         unselectedLabelStyle: GoogleFonts.poppins(fontSize: 11),
         type: BottomNavigationBarType.fixed,
         items: [
@@ -1196,56 +1308,63 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
   void _confirmDeleteProduct(ProductModel product, bool isDark) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? AppColors.bgCard : AppColors.bgCardLight,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          Lang.isSwahili ? 'Futa Bidhaa?' : 'Delete Product?',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w700,
-            color: isDark ? AppColors.textWhite : AppColors.textDark,
-          ),
-        ),
-        content: Text(
-          Lang.isSwahili
-              ? 'Una uhakika unataka kufuta "${product.name}"?'
-              : 'Are you sure you want to delete "${product.name}"?',
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            color: isDark ? AppColors.textGrey : AppColors.textDarkGrey,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(Lang.get('cancel'),
-                style: GoogleFonts.poppins(color: AppColors.textGrey)),
-          ),
-          GestureDetector(
-            onTap: () async {
-              await _firestoreService.deleteProduct(product.productId);
-              if (!ctx.mounted) { return; }
-              Navigator.pop(ctx);
-            },
-            child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
-                color: AppColors.error.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                Lang.get('delete'),
-                style: GoogleFonts.poppins(
-                  color: AppColors.error,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
+      builder:
+          (ctx) => AlertDialog(
+            backgroundColor: isDark ? AppColors.bgCard : AppColors.bgCardLight,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Text(
+              Lang.isSwahili ? 'Futa Bidhaa?' : 'Delete Product?',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w700,
+                color: isDark ? AppColors.textWhite : AppColors.textDark,
               ),
             ),
+            content: Text(
+              Lang.isSwahili
+                  ? 'Una uhakika unataka kufuta "${product.name}"?'
+                  : 'Are you sure you want to delete "${product.name}"?',
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                color: isDark ? AppColors.textGrey : AppColors.textDarkGrey,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(
+                  Lang.get('cancel'),
+                  style: GoogleFonts.poppins(color: AppColors.textGrey),
+                ),
+              ),
+              GestureDetector(
+                onTap: () async {
+                  await _firestoreService.deleteProduct(product.productId);
+                  if (!ctx.mounted) return;
+                  Navigator.pop(ctx);
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    Lang.get('delete'),
+                    style: GoogleFonts.poppins(
+                      color: AppColors.error,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -1254,173 +1373,216 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
     final descController = TextEditingController();
     final locationController = TextEditingController();
     String selectedCategory = 'Electronics';
+    String? localProductImageUrl;
 
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          backgroundColor: isDark ? AppColors.bgCard : AppColors.bgCardLight,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20)),
-          title: Text(
-            Lang.isSwahili ? 'Ongeza Duka' : 'Add Shop',
-            style: GoogleFonts.poppins(
-              color: isDark ? AppColors.textWhite : AppColors.textDark,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nameController,
-                  style: GoogleFonts.poppins(
-                    color: isDark ? AppColors.textWhite : AppColors.textDark,
-                    fontSize: 14,
+      builder:
+          (context) => StatefulBuilder(
+            builder:
+                (context, setDialogState) => AlertDialog(
+                  backgroundColor:
+                      isDark ? AppColors.bgCard : AppColors.bgCardLight,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  decoration: InputDecoration(
-                    hintText:
-                        Lang.isSwahili ? 'Jina la Duka' : 'Shop Name',
+                  title: Text(
+                    Lang.isSwahili ? 'Ongeza Duka' : 'Add Shop',
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
                   ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: descController,
-                  style: GoogleFonts.poppins(
-                    color: isDark ? AppColors.textWhite : AppColors.textDark,
-                    fontSize: 14,
-                  ),
-                  decoration: InputDecoration(
-                    hintText:
-                        Lang.isSwahili ? 'Maelezo' : 'Description',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: locationController,
-                  style: GoogleFonts.poppins(
-                    color: isDark ? AppColors.textWhite : AppColors.textDark,
-                    fontSize: 14,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: Lang.isSwahili ? 'Mahali' : 'Location',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? AppColors.bgSurface
-                        : AppColors.bgSurfaceLight,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isDark
-                          ? const Color(0xFF2A3158)
-                          : const Color(0xFFDDE0FF),
-                      width: 1,
-                    ),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      isExpanded: true,
-                      value: selectedCategory,
-                      dropdownColor: isDark
-                          ? AppColors.bgCard
-                          : AppColors.bgCardLight,
-                      items: [
-                        'Electronics',
-                        'Clothing',
-                        'Food',
-                        'Beauty',
-                        'Home',
-                        'Sports',
-                        'Other',
-                      ]
-                          .map((cat) => DropdownMenuItem(
-                                value: cat,
-                                child: Text(
-                                  cat,
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          controller: nameController,
+                          style: GoogleFonts.poppins(
+                            color:
+                                isDark
+                                    ? AppColors.textWhite
+                                    : AppColors.textDark,
+                            fontSize: 14,
+                          ),
+                          decoration: InputDecoration(
+                            hintText:
+                                Lang.isSwahili ? 'Jina la Duka' : 'Shop Name',
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: descController,
+                          style: GoogleFonts.poppins(
+                            color:
+                                isDark
+                                    ? AppColors.textWhite
+                                    : AppColors.textDark,
+                            fontSize: 14,
+                          ),
+                          decoration: InputDecoration(
+                            hintText:
+                                Lang.isSwahili ? 'Maelezo' : 'Description',
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: locationController,
+                          style: GoogleFonts.poppins(
+                            color:
+                                isDark
+                                    ? AppColors.textWhite
+                                    : AppColors.textDark,
+                            fontSize: 14,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: Lang.isSwahili ? 'Mahali' : 'Location',
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Image Upload
+                        GestureDetector(
+                          onTap: () async {
+                            final file = await CloudinaryService.pickImage();
+                            if (file == null) return;
+                            final url = await CloudinaryService.uploadImage(
+                              file,
+                            );
+                            if (url != null) {
+                              setDialogState(() => localProductImageUrl = url);
+                            }
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color:
+                                  (localProductImageUrl?.isNotEmpty ?? false)
+                                      ? AppColors.success.withValues(alpha: 0.1)
+                                      : isDark
+                                      ? AppColors.bgSurface
+                                      : AppColors.bgSurfaceLight,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color:
+                                    (localProductImageUrl?.isNotEmpty ?? false)
+                                        ? AppColors.success.withValues(
+                                          alpha: 0.3,
+                                        )
+                                        : isDark
+                                        ? const Color(0xFF2A3158)
+                                        : const Color(0xFFDDE0FF),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  (localProductImageUrl?.isNotEmpty ?? false)
+                                      ? Icons.check_circle_rounded
+                                      : Icons.camera_alt_rounded,
+                                  color:
+                                      (localProductImageUrl?.isNotEmpty ??
+                                              false)
+                                          ? AppColors.success
+                                          : isDark
+                                          ? AppColors.textGrey
+                                          : AppColors.textDarkGrey,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  (localProductImageUrl?.isNotEmpty ?? false)
+                                      ? (Lang.isSwahili
+                                          ? 'Picha imepakiwa ✓'
+                                          : 'Image uploaded ✓')
+                                      : (Lang.isSwahili
+                                          ? 'Pakia Picha ya Duka'
+                                          : 'Upload Shop Image'),
                                   style: GoogleFonts.poppins(
-                                    color: isDark
-                                        ? AppColors.textWhite
-                                        : AppColors.textDark,
-                                    fontSize: 14,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color:
+                                        (localProductImageUrl?.isNotEmpty ??
+                                                false)
+                                            ? AppColors.success
+                                            : isDark
+                                            ? AppColors.textGrey
+                                            : AppColors.textDarkGrey,
                                   ),
                                 ),
-                              ))
-                          .toList(),
-                      onChanged: (val) =>
-                          setDialogState(() => selectedCategory = val!),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        Lang.get('cancel'),
+                        style: GoogleFonts.poppins(color: AppColors.textGrey),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        if (nameController.text.isEmpty) return;
+                        final shopId =
+                            DateTime.now().millisecondsSinceEpoch.toString();
+                        await _firestoreService.addShop(
+                          ShopModel(
+                            shopId: shopId,
+                            name: nameController.text.trim(),
+                            description: descController.text.trim(),
+                            category: selectedCategory,
+                            location: locationController.text.trim(),
+                            ownerId: _currentUserId ?? '',
+                            status: 'pending',
+                            createdAt: DateTime.now(),
+                          ),
+                        );
+                        if (!context.mounted) return;
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              Lang.isSwahili
+                                  ? 'Duka limewasilishwa kwa admin kuidhinishwa'
+                                  : 'Shop submitted for admin approval',
+                              style: GoogleFonts.poppins(fontSize: 13),
+                            ),
+                            backgroundColor: AppColors.warning,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            margin: const EdgeInsets.all(16),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: AppColors.primaryGradient,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          Lang.get('save'),
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(Lang.get('cancel'),
-                  style:
-                      GoogleFonts.poppins(color: AppColors.textGrey)),
-            ),
-            GestureDetector(
-              onTap: () async {
-                if (nameController.text.isEmpty) { return; }
-                final shopId =
-                    DateTime.now().millisecondsSinceEpoch.toString();
-                await _firestoreService.addShop(
-                  ShopModel(
-                    shopId: shopId,
-                    name: nameController.text.trim(),
-                    description: descController.text.trim(),
-                    category: selectedCategory,
-                    location: locationController.text.trim(),
-                    ownerId: _currentUserId ?? '',
-                    status: 'pending',
-                    createdAt: DateTime.now(),
-                  ),
-                );
-                if (!context.mounted) { return; }
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      Lang.isSwahili
-                          ? 'Duka limewasilishwa kwa admin kuidhinishwa'
-                          : 'Shop submitted for admin approval',
-                      style: GoogleFonts.poppins(fontSize: 13),
-                    ),
-                    backgroundColor: AppColors.warning,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    margin: const EdgeInsets.all(16),
-                  ),
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  gradient: AppColors.primaryGradient,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  Lang.get('save'),
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -1430,189 +1592,242 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
     final descController = TextEditingController();
     final stockController = TextEditingController();
     String selectedCategory = 'Electronics';
+    String? productImageUrlLocal = '';
 
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          backgroundColor: isDark ? AppColors.bgCard : AppColors.bgCardLight,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20)),
-          title: Text(
-            Lang.isSwahili ? 'Ongeza Bidhaa' : 'Add Product',
-            style: GoogleFonts.poppins(
-              color: isDark ? AppColors.textWhite : AppColors.textDark,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nameController,
-                  style: GoogleFonts.poppins(
-                    color: isDark ? AppColors.textWhite : AppColors.textDark,
-                    fontSize: 14,
+      builder:
+          (context) => StatefulBuilder(
+            builder:
+                (context, setDialogState) => AlertDialog(
+                  backgroundColor:
+                      isDark ? AppColors.bgCard : AppColors.bgCardLight,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  decoration: InputDecoration(
-                    hintText: Lang.isSwahili
-                        ? 'Jina la Bidhaa'
-                        : 'Product Name',
+                  title: Text(
+                    Lang.isSwahili ? 'Ongeza Bidhaa' : 'Add Product',
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
                   ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: priceController,
-                  keyboardType: TextInputType.number,
-                  style: GoogleFonts.poppins(
-                    color: isDark ? AppColors.textWhite : AppColors.textDark,
-                    fontSize: 14,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: Lang.isSwahili ? 'Bei (TSh)' : 'Price (TSh)',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: descController,
-                  style: GoogleFonts.poppins(
-                    color: isDark ? AppColors.textWhite : AppColors.textDark,
-                    fontSize: 14,
-                  ),
-                  decoration: InputDecoration(
-                    hintText:
-                        Lang.isSwahili ? 'Maelezo' : 'Description',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: stockController,
-                  keyboardType: TextInputType.number,
-                  style: GoogleFonts.poppins(
-                    color: isDark ? AppColors.textWhite : AppColors.textDark,
-                    fontSize: 14,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: Lang.isSwahili ? 'Idadi' : 'Stock',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? AppColors.bgSurface
-                        : AppColors.bgSurfaceLight,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isDark
-                          ? const Color(0xFF2A3158)
-                          : const Color(0xFFDDE0FF),
-                      width: 1,
-                    ),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      isExpanded: true,
-                      value: selectedCategory,
-                      dropdownColor: isDark
-                          ? AppColors.bgCard
-                          : AppColors.bgCardLight,
-                      items: [
-                        'Electronics',
-                        'Clothing',
-                        'Food',
-                        'Beauty',
-                        'Home',
-                        'Sports',
-                        'Other',
-                      ]
-                          .map((cat) => DropdownMenuItem(
-                                value: cat,
-                                child: Text(
-                                  cat,
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          controller: nameController,
+                          style: GoogleFonts.poppins(
+                            color:
+                                isDark
+                                    ? AppColors.textWhite
+                                    : AppColors.textDark,
+                            fontSize: 14,
+                          ),
+                          decoration: InputDecoration(
+                            hintText:
+                                Lang.isSwahili
+                                    ? 'Jina la Bidhaa'
+                                    : 'Product Name',
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: priceController,
+                          keyboardType: TextInputType.number,
+                          style: GoogleFonts.poppins(
+                            color:
+                                isDark
+                                    ? AppColors.textWhite
+                                    : AppColors.textDark,
+                            fontSize: 14,
+                          ),
+                          decoration: InputDecoration(
+                            hintText:
+                                Lang.isSwahili ? 'Bei (TSh)' : 'Price (TSh)',
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: descController,
+                          style: GoogleFonts.poppins(
+                            color:
+                                isDark
+                                    ? AppColors.textWhite
+                                    : AppColors.textDark,
+                            fontSize: 14,
+                          ),
+                          decoration: InputDecoration(
+                            hintText:
+                                Lang.isSwahili ? 'Maelezo' : 'Description',
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: stockController,
+                          keyboardType: TextInputType.number,
+                          style: GoogleFonts.poppins(
+                            color:
+                                isDark
+                                    ? AppColors.textWhite
+                                    : AppColors.textDark,
+                            fontSize: 14,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: Lang.isSwahili ? 'Idadi' : 'Stock',
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Image Upload for Product
+                        GestureDetector(
+                          onTap: () async {
+                            final file = await CloudinaryService.pickImage();
+                            if (file == null) return;
+                            final url = await CloudinaryService.uploadImage(
+                              file,
+                            );
+                            if (url != null) {
+                              setDialogState(() => productImageUrlLocal = url);
+                            }
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color:
+                                  (productImageUrlLocal?.isNotEmpty ?? false)
+                                      ? AppColors.success.withValues(alpha: 0.1)
+                                      : isDark
+                                      ? AppColors.bgSurface
+                                      : AppColors.bgSurfaceLight,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color:
+                                    (productImageUrlLocal?.isNotEmpty ?? false)
+                                        ? AppColors.success.withValues(
+                                          alpha: 0.3,
+                                        )
+                                        : isDark
+                                        ? const Color(0xFF2A3158)
+                                        : const Color(0xFFDDE0FF),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  (productImageUrlLocal?.isNotEmpty ?? false)
+                                      ? Icons.check_circle_rounded
+                                      : Icons.camera_alt_rounded,
+                                  color:
+                                      (productImageUrlLocal?.isNotEmpty ??
+                                              false)
+                                          ? AppColors.success
+                                          : isDark
+                                          ? AppColors.textGrey
+                                          : AppColors.textDarkGrey,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  (productImageUrlLocal?.isNotEmpty ?? false)
+                                      ? (Lang.isSwahili
+                                          ? 'Picha imepakiwa ✓'
+                                          : 'Image uploaded ✓')
+                                      : (Lang.isSwahili
+                                          ? 'Pakia Picha ya Bidhaa'
+                                          : 'Upload Product Image'),
                                   style: GoogleFonts.poppins(
-                                    color: isDark
-                                        ? AppColors.textWhite
-                                        : AppColors.textDark,
-                                    fontSize: 14,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color:
+                                        (productImageUrlLocal?.isNotEmpty ??
+                                                false)
+                                            ? AppColors.success
+                                            : isDark
+                                            ? AppColors.textGrey
+                                            : AppColors.textDarkGrey,
                                   ),
                                 ),
-                              ))
-                          .toList(),
-                      onChanged: (val) =>
-                          setDialogState(() => selectedCategory = val!),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        Lang.get('cancel'),
+                        style: GoogleFonts.poppins(color: AppColors.textGrey),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        if (nameController.text.isEmpty ||
+                            priceController.text.isEmpty)
+                          return;
+                        final productId =
+                            DateTime.now().millisecondsSinceEpoch.toString();
+                        await _firestoreService.addProduct(
+                          ProductModel(
+                            productId: productId,
+                            shopId: shopId,
+                            name: nameController.text.trim(),
+                            description: descController.text.trim(),
+                            price: double.tryParse(priceController.text) ?? 0,
+                            productImage:
+                                productImageUrlLocal?.isNotEmpty == true
+                                    ? productImageUrlLocal
+                                    : null,
+                            category: selectedCategory,
+                            stock: int.tryParse(stockController.text) ?? 0,
+                            isAvailable: true,
+                            createdAt: DateTime.now(),
+                          ),
+                        );
+                        if (!context.mounted) return;
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              Lang.isSwahili
+                                  ? 'Bidhaa imeongezwa!'
+                                  : 'Product added successfully!',
+                              style: GoogleFonts.poppins(fontSize: 13),
+                            ),
+                            backgroundColor: AppColors.success,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            margin: const EdgeInsets.all(16),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: AppColors.primaryGradient,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          Lang.get('save'),
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(Lang.get('cancel'),
-                  style:
-                      GoogleFonts.poppins(color: AppColors.textGrey)),
-            ),
-            GestureDetector(
-              onTap: () async {
-                if (nameController.text.isEmpty ||
-                    priceController.text.isEmpty) { return; }
-                final productId =
-                    DateTime.now().millisecondsSinceEpoch.toString();
-                await _firestoreService.addProduct(
-                  ProductModel(
-                    productId: productId,
-                    shopId: shopId,
-                    name: nameController.text.trim(),
-                    description: descController.text.trim(),
-                    price: double.tryParse(priceController.text) ?? 0,
-                    category: selectedCategory,
-                    stock: int.tryParse(stockController.text) ?? 0,
-                    isAvailable: true,
-                    createdAt: DateTime.now(),
-                  ),
-                );
-                if (!context.mounted) { return; }
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      Lang.isSwahili
-                          ? 'Bidhaa imeongezwa!'
-                          : 'Product added successfully!',
-                      style: GoogleFonts.poppins(fontSize: 13),
-                    ),
-                    backgroundColor: AppColors.success,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    margin: const EdgeInsets.all(16),
-                  ),
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  gradient: AppColors.primaryGradient,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  Lang.get('save'),
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

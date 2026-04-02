@@ -17,24 +17,20 @@ import 'screens/delivery/delivery_home.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => CartService()),
-      ],
-      child: const MyApp(),
-    ),
-  );
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => ThemeProvider()),
+      ChangeNotifierProvider(create: (_) => CartService()),
+    ],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-
     return MaterialApp(
       title: 'ZenjShop',
       debugShowCheckedModeBanner: false,
@@ -43,13 +39,13 @@ class MyApp extends StatelessWidget {
       themeMode: themeProvider.isDark ? ThemeMode.dark : ThemeMode.light,
       home: const Wrapper(),
       routes: {
-        '/welcome': (context) => const WelcomeScreen(),
-        '/login': (context) => const LoginScreen(),
-        '/signup': (context) => const SignupScreen(),
-        '/admin': (context) => const AdminHome(),
-        '/customer': (context) => const CustomerHome(),
-        '/shop_owner': (context) => const ShopOwnerHome(),
-        '/delivery': (context) => const DeliveryHome(),
+        '/welcome': (_) => const WelcomeScreen(),
+        '/login': (_) => const LoginScreen(),
+        '/signup': (_) => const SignupScreen(),
+        '/admin': (_) => const AdminHome(),
+        '/customer': (_) => const CustomerHome(),
+        '/shop_owner': (_) => const ShopOwnerHome(),
+        '/delivery': (_) => const DeliveryHome(),
       },
     );
   }
