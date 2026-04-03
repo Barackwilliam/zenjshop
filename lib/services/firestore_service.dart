@@ -52,6 +52,28 @@ class FirestoreService {
     } catch (_) { return false; }
   }
 
+  // Delete shop AND all its products in one batch
+  Future<bool> deleteShopCascade(String shopId) async {
+    try {
+      final products = await _db.collection('products')
+          .where('shopId', isEqualTo: shopId).get();
+      final batch = _db.batch();
+      for (final doc in products.docs) {
+        batch.delete(doc.reference);
+      }
+      batch.delete(_db.collection('shops').doc(shopId));
+      await batch.commit();
+      return true;
+    } catch (_) { return false; }
+  }
+
+  Future<bool> deleteUserFromFirestore(String uid) async {
+    try {
+      await _db.collection('users').doc(uid).delete();
+      return true;
+    } catch (_) { return false; }
+  }
+
   Stream<List<ShopModel>> getActiveShops() =>
       _db.collection('shops').where('status', isEqualTo: 'active').snapshots()
           .map((s) => s.docs.map((d) => ShopModel.fromMap(d.data())).toList());
@@ -154,21 +176,33 @@ class FirestoreService {
   }
 
   Stream<List<OrderModel>> getAllOrders() =>
-      _db.collection('orders').orderBy('createdAt', descending: true).snapshots()
-          .map((s) => s.docs.map((d) => OrderModel.fromMap(d.data())).toList());
+      _db.collection('orders').snapshots()
+          .map((s) {
+            final list = s.docs.map((d) => OrderModel.fromMap(d.data())).toList();
+            list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+            return list;
+          });
 
   Stream<List<OrderModel>> getShopOwnerOrders(List<String> shopIds) {
     if (shopIds.isEmpty) return Stream.value([]);
     return _db.collection('orders')
         .where('shopId', whereIn: shopIds.take(10).toList())
-        .orderBy('createdAt', descending: true).snapshots()
-        .map((s) => s.docs.map((d) => OrderModel.fromMap(d.data())).toList());
+        .snapshots()
+        .map((s) {
+          final list = s.docs.map((d) => OrderModel.fromMap(d.data())).toList();
+          list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return list;
+        });
   }
 
   Stream<List<OrderModel>> getCustomerOrders(String customerId) =>
       _db.collection('orders').where('customerId', isEqualTo: customerId)
-          .orderBy('createdAt', descending: true).snapshots()
-          .map((s) => s.docs.map((d) => OrderModel.fromMap(d.data())).toList());
+          .snapshots()
+          .map((s) {
+            final list = s.docs.map((d) => OrderModel.fromMap(d.data())).toList();
+            list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+            return list;
+          });
 
   Future<bool> updateOrderStatus(String orderId, String status) async {
     try {
@@ -247,9 +281,12 @@ class FirestoreService {
   }
 
   Stream<List<NotificationModel>> getUserNotifications(String userId) =>
-      _db.collection('notifications').where('userId', isEqualTo: userId)
-          .orderBy('createdAt', descending: true).snapshots()
-          .map((s) => s.docs.map((d) => NotificationModel.fromMap(d.data())).toList());
+      _db.collection('notifications').where('userId', isEqualTo: userId).snapshots()
+          .map((s) {
+            final list = s.docs.map((d) => NotificationModel.fromMap(d.data())).toList();
+            list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+            return list;
+          });
 
   Future<bool> markNotificationRead(String id) async {
     try {
@@ -262,10 +299,11 @@ class FirestoreService {
     try {
       final batch = _db.batch();
       final snap = await _db.collection('notifications')
-          .where('userId', isEqualTo: userId)
-          .where('isRead', isEqualTo: false).get();
+          .where('userId', isEqualTo: userId).get();
       for (final doc in snap.docs) {
-        batch.update(doc.reference, {'isRead': true});
+        if (doc.data()['isRead'] == false) {
+          batch.update(doc.reference, {'isRead': true});
+        }
       }
       await batch.commit();
       return true;
@@ -274,7 +312,6 @@ class FirestoreService {
 
   Stream<int> getUnreadNotificationsCount(String userId) =>
       _db.collection('notifications')
-          .where('userId', isEqualTo: userId)
-          .where('isRead', isEqualTo: false).snapshots()
-          .map((s) => s.docs.length);
+          .where('userId', isEqualTo: userId).snapshots()
+          .map((s) => s.docs.where((d) => d.data()['isRead'] == false).length);
 }

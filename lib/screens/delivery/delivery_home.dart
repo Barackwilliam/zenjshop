@@ -6,6 +6,7 @@ import '../../config/theme_provider.dart';
 import '../../config/lang.dart';
 import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
+import '../../services/network_service.dart';
 import '../../models/delivery_model.dart';
 import '../../models/order_model.dart';
 
@@ -16,21 +17,41 @@ class DeliveryHome extends StatefulWidget {
   State<DeliveryHome> createState() => _DeliveryHomeState();
 }
 
-class _DeliveryHomeState extends State<DeliveryHome> {
+class _DeliveryHomeState extends State<DeliveryHome> with ConnectivityMixin {
   final _authService = AuthService();
   final _firestoreService = FirestoreService();
   int _selectedIndex = 0;
   String? _currentUserId;
+  String _userName = '';
+  String _userEmail = '';
+  String _userPhone = '';
 
   @override
   void initState() {
-    super.initState();
+    super.initState(); // calls checkConnectivity via mixin
     _currentUserId = _authService.currentUser?.uid;
+    _loadUserData();
+  }
+
+  void _loadUserData() async {
+    final uid = _authService.currentUser?.uid;
+    if (uid != null) {
+      final data = await _firestoreService.getUserData(uid);
+      if (mounted && data != null) {
+        setState(() {
+          _userName = data.name;
+          _userEmail = data.email;
+          _userPhone = data.phone;
+        });
+      }
+    }
   }
 
   void _logout() async {
     await _authService.logout();
-    if (!mounted) { return; }
+    if (!mounted) {
+      return;
+    }
     Navigator.pushReplacementNamed(context, '/welcome');
   }
 
@@ -42,12 +63,19 @@ class _DeliveryHomeState extends State<DeliveryHome> {
     return Scaffold(
       backgroundColor: isDark ? AppColors.bgDark : AppColors.bgLight,
       body: SafeArea(
-        child:
-            _selectedIndex == 0
-                ? _buildDashboard(isDark)
-                : _selectedIndex == 1
-                ? _buildActiveDeliveries(isDark)
-                : _buildProfileTab(isDark, themeProvider),
+        child: Column(
+          children: [
+            buildOfflineBanner(),
+            Expanded(
+              child:
+                  _selectedIndex == 0
+                      ? _buildDashboard(isDark)
+                      : _selectedIndex == 1
+                      ? _buildActiveDeliveries(isDark)
+                      : _buildProfileTab(isDark, themeProvider),
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: _buildBottomNav(isDark),
     );
@@ -281,44 +309,179 @@ class _DeliveryHomeState extends State<DeliveryHome> {
   }
 
   // ==================== PROFILE TAB ====================
+  Widget _profileStatCard(
+    bool isDark,
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.bgCard : AppColors.bgCardLight,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? const Color(0xFF2A3158) : const Color(0xFFDDE0FF),
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(height: 6),
+            Text(
+              value,
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: isDark ? AppColors.textWhite : AppColors.textDark,
+              ),
+            ),
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontSize: 10,
+                color: isDark ? AppColors.textGrey : AppColors.textDarkGrey,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildProfileTab(bool isDark, ThemeProvider themeProvider) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           Container(
-            width: 90,
-            height: 90,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
                 colors: [AppColors.success, Color(0xFF00A86B)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.success.withValues(alpha: 0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
+              borderRadius: BorderRadius.all(Radius.circular(24)),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 3),
+                  ),
+                  child: const Icon(
+                    Icons.delivery_dining_rounded,
+                    color: Colors.white,
+                    size: 48,
+                  ),
                 ),
+                const SizedBox(height: 14),
+                Text(
+                  _userName.isNotEmpty
+                      ? _userName
+                      : (Lang.isSwahili ? 'Msafirishaji' : 'Delivery Person'),
+                  style: GoogleFonts.poppins(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _userEmail.isNotEmpty
+                      ? _userEmail
+                      : (_authService.currentUser?.email ?? ''),
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.white.withValues(alpha: 0.85),
+                  ),
+                ),
+                if (_userPhone.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.phone_rounded,
+                          color: Colors.white,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          _userPhone,
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
-            child: const Icon(
-              Icons.delivery_dining_rounded,
-              color: Colors.white,
-              size: 44,
-            ),
           ),
-          const SizedBox(height: 16),
-          Text(
-            Lang.isSwahili ? 'Msafirishaji' : 'Delivery Person',
-            style: GoogleFonts.poppins(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: isDark ? AppColors.textWhite : AppColors.textDark,
+          const SizedBox(height: 20),
+          StreamBuilder(
+            stream: _firestoreService.getDeliveryPersonOrders(
+              _currentUserId ?? '',
             ),
+            builder: (context, snap) {
+              final deliveries = snap.data ?? [];
+              final completed =
+                  deliveries.where((d) => d.status == 'delivered').length;
+              final active =
+                  deliveries.where((d) => d.status != 'delivered').length;
+              return Row(
+                children: [
+                  _profileStatCard(
+                    isDark,
+                    Lang.isSwahili ? 'Zote' : 'Total',
+                    '${deliveries.length}',
+                    Icons.list_alt_rounded,
+                    AppColors.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  _profileStatCard(
+                    isDark,
+                    Lang.isSwahili ? 'Zinazoendelea' : 'Active',
+                    '$active',
+                    Icons.delivery_dining_rounded,
+                    AppColors.warning,
+                  ),
+                  const SizedBox(width: 12),
+                  _profileStatCard(
+                    isDark,
+                    Lang.isSwahili ? 'Zilizokamilika' : 'Done',
+                    '$completed',
+                    Icons.check_circle_rounded,
+                    AppColors.success,
+                  ),
+                ],
+              );
+            },
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
 
           _buildSettingsTile(
             icon: Icons.dark_mode_rounded,
@@ -565,10 +728,16 @@ class _DeliveryHomeState extends State<DeliveryHome> {
               );
               // Weka deliveryPersonId kwenye order na badilisha status
               await _firestoreService.assignDeliveryPerson(
-                  order.orderId, _currentUserId ?? '');
+                order.orderId,
+                _currentUserId ?? '',
+              );
               await _firestoreService.updateOrderStatus(
-                  order.orderId, 'picked_up');
-              if (!mounted) { return; }
+                order.orderId,
+                'picked_up',
+              );
+              if (!mounted) {
+                return;
+              }
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(

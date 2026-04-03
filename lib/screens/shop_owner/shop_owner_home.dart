@@ -12,6 +12,7 @@ import '../../models/order_model.dart';
 
 import '../notifications/notifications_screen.dart';
 import '../../services/cloudinary_service.dart';
+import '../../services/network_service.dart';
 
 class ShopOwnerHome extends StatefulWidget {
   const ShopOwnerHome({super.key});
@@ -20,24 +21,23 @@ class ShopOwnerHome extends StatefulWidget {
   State<ShopOwnerHome> createState() => _ShopOwnerHomeState();
 }
 
-class _ShopOwnerHomeState extends State<ShopOwnerHome> {
+class _ShopOwnerHomeState extends State<ShopOwnerHome> with ConnectivityMixin {
   final _authService = AuthService();
   final _firestoreService = FirestoreService();
   int _selectedIndex = 0;
   String? _currentUserId;
 
-  // Variable iliyokuwa inasababisha error
-  String? productImageUrl;
-
   @override
   void initState() {
-    super.initState();
+    super.initState(); // calls checkConnectivity via mixin
     _currentUserId = _authService.currentUser?.uid;
   }
 
   void _logout() async {
     await _authService.logout();
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     Navigator.pushReplacementNamed(context, '/welcome');
   }
 
@@ -49,14 +49,21 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
     return Scaffold(
       backgroundColor: isDark ? AppColors.bgDark : AppColors.bgLight,
       body: SafeArea(
-        child:
-            _selectedIndex == 0
-                ? _buildDashboard(isDark)
-                : _selectedIndex == 1
-                ? _buildShopsTab(isDark)
-                : _selectedIndex == 2
-                ? _buildOrdersTab(isDark)
-                : _buildProfileTab(isDark, themeProvider),
+        child: Column(
+          children: [
+            buildOfflineBanner(),
+            Expanded(
+              child:
+                  _selectedIndex == 0
+                      ? _buildDashboard(isDark)
+                      : _selectedIndex == 1
+                      ? _buildShopsTab(isDark)
+                      : _selectedIndex == 2
+                      ? _buildOrdersTab(isDark)
+                      : _buildProfileTab(isDark, themeProvider),
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: _buildBottomNav(isDark),
     );
@@ -103,6 +110,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
               ),
               Row(
                 children: [
+                  // Notification button na badge ya unread count
                   StreamBuilder<int>(
                     stream: _firestoreService.getUnreadNotificationsCount(
                       _currentUserId ?? '',
@@ -156,6 +164,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                     },
                   ),
                   const SizedBox(width: 10),
+                  // Logout button
                   GestureDetector(
                     onTap: _logout,
                     child: Container(
@@ -183,7 +192,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
 
           const SizedBox(height: 24),
 
-          // Stats
+          // Stats — inatumia maduka ya owner na orders za maduka yake
           StreamBuilder<List<ShopModel>>(
             stream: _firestoreService.getMyShops(_currentUserId ?? ''),
             builder: (context, shopSnapshot) {
@@ -281,7 +290,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
 
           const SizedBox(height: 24),
 
-          // Recent Orders
+          // Recent Orders — za maduka ya owner tu
           Text(
             Lang.isSwahili ? 'Maagizo ya Hivi Karibuni' : 'Recent Orders',
             style: GoogleFonts.poppins(
@@ -387,9 +396,10 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
               return ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 itemCount: snapshot.data!.length,
-                itemBuilder:
-                    (context, index) =>
-                        _buildShopTile(snapshot.data![index], isDark),
+                itemBuilder: (context, index) {
+                  final shop = snapshot.data![index];
+                  return _buildShopTile(shop, isDark);
+                },
               );
             },
           ),
@@ -438,9 +448,9 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     itemCount: snapshot.data!.length,
-                    itemBuilder:
-                        (context, index) =>
-                            _buildOrderCard(snapshot.data![index], isDark),
+                    itemBuilder: (context, index) {
+                      return _buildOrderCard(snapshot.data![index], isDark);
+                    },
                   );
                 },
               );
@@ -554,6 +564,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
           ),
 
           const SizedBox(height: 10),
+
           GestureDetector(
             onTap: _logout,
             child: Container(
@@ -593,7 +604,8 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
     );
   }
 
-  // ==================== HELPER WIDGETS ====================
+  // ==================== WIDGETS ====================
+
   Widget _buildStatCard({
     required String title,
     required String value,
@@ -773,20 +785,26 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
             ],
           ),
           const SizedBox(height: 12),
+          // Upload shop image button
           GestureDetector(
             onTap: () async {
               final file = await CloudinaryService.pickImage();
-              if (file == null) return;
+              if (file == null) {
+                return;
+              }
               final url = await CloudinaryService.uploadImage(file);
               if (url != null) {
                 await _firestoreService.updateShopImage(shop.shopId, url);
-                if (!context.mounted) return;
+                if (!context.mounted) {
+                  return;
+                }
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
                       Lang.isSwahili
                           ? 'Picha ya duka imepakiwa!'
                           : 'Shop image uploaded!',
+                      style: GoogleFonts.poppins(fontSize: 13),
                     ),
                     backgroundColor: AppColors.success,
                     behavior: SnackBarBehavior.floating,
@@ -833,6 +851,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
             ),
           ),
           const SizedBox(height: 8),
+          // Add Product Button
           GestureDetector(
             onTap: () => _showAddProductDialog(shop.shopId, isDark),
             child: Container(
@@ -868,6 +887,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
             ),
           ),
           const SizedBox(height: 10),
+          // Products List na delete button
           StreamBuilder<List<ProductModel>>(
             stream: _firestoreService.getShopProducts(shop.shopId),
             builder: (context, snapshot) {
@@ -940,6 +960,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
               ],
             ),
           ),
+          // Toggle availability
           GestureDetector(
             onTap:
                 () => _firestoreService.updateProductAvailability(
@@ -967,6 +988,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
             ),
           ),
           const SizedBox(width: 6),
+          // Delete product
           GestureDetector(
             onTap: () => _confirmDeleteProduct(product, isDark),
             child: Container(
@@ -1160,6 +1182,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
               ),
             ],
           ),
+          // Items ya order
           if (order.items.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
@@ -1341,7 +1364,9 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
               GestureDetector(
                 onTap: () async {
                   await _firestoreService.deleteProduct(product.productId);
-                  if (!ctx.mounted) return;
+                  if (!ctx.mounted) {
+                    return;
+                  }
                   Navigator.pop(ctx);
                 },
                 child: Container(
@@ -1373,7 +1398,8 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
     final descController = TextEditingController();
     final locationController = TextEditingController();
     String selectedCategory = 'Electronics';
-    String? localProductImageUrl;
+    String productImageUrl =
+        ''; // shop image URL (variable named for reuse in inner StatefulBuilder)
 
     showDialog(
       context: context,
@@ -1388,7 +1414,10 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                   ),
                   title: Text(
                     Lang.isSwahili ? 'Ongeza Duka' : 'Add Shop',
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
+                    style: GoogleFonts.poppins(
+                      color: isDark ? AppColors.textWhite : AppColors.textDark,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   content: SingleChildScrollView(
                     child: Column(
@@ -1438,79 +1467,146 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                           ),
                         ),
                         const SizedBox(height: 12),
-
-                        // Image Upload
-                        GestureDetector(
-                          onTap: () async {
-                            final file = await CloudinaryService.pickImage();
-                            if (file == null) return;
-                            final url = await CloudinaryService.uploadImage(
-                              file,
-                            );
-                            if (url != null) {
-                              setDialogState(() => localProductImageUrl = url);
-                            }
-                          },
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            decoration: BoxDecoration(
-                              color:
-                                  (localProductImageUrl?.isNotEmpty ?? false)
-                                      ? AppColors.success.withValues(alpha: 0.1)
-                                      : isDark
-                                      ? AppColors.bgSurface
-                                      : AppColors.bgSurfaceLight,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color:
-                                    (localProductImageUrl?.isNotEmpty ?? false)
-                                        ? AppColors.success.withValues(
-                                          alpha: 0.3,
-                                        )
-                                        : isDark
-                                        ? const Color(0xFF2A3158)
-                                        : const Color(0xFFDDE0FF),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  (localProductImageUrl?.isNotEmpty ?? false)
-                                      ? Icons.check_circle_rounded
-                                      : Icons.camera_alt_rounded,
-                                  color:
-                                      (localProductImageUrl?.isNotEmpty ??
-                                              false)
-                                          ? AppColors.success
-                                          : isDark
-                                          ? AppColors.textGrey
-                                          : AppColors.textDarkGrey,
-                                  size: 18,
+                        // Product image upload
+                        StatefulBuilder(
+                          builder: (ctx2, setImgState) {
+                            return GestureDetector(
+                              onTap: () async {
+                                final file =
+                                    await CloudinaryService.pickImage();
+                                if (file == null) {
+                                  return;
+                                }
+                                setImgState(() {});
+                                final url = await CloudinaryService.uploadImage(
+                                  file,
+                                );
+                                if (url != null) {
+                                  setImgState(() => productImageUrl = url);
+                                }
+                              },
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
                                 ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  (localProductImageUrl?.isNotEmpty ?? false)
-                                      ? (Lang.isSwahili
-                                          ? 'Picha imepakiwa ✓'
-                                          : 'Image uploaded ✓')
-                                      : (Lang.isSwahili
-                                          ? 'Pakia Picha ya Duka'
-                                          : 'Upload Shop Image'),
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
+                                decoration: BoxDecoration(
+                                  color:
+                                      productImageUrl.isNotEmpty
+                                          ? AppColors.success.withValues(
+                                            alpha: 0.1,
+                                          )
+                                          : isDark
+                                          ? AppColors.bgSurface
+                                          : AppColors.bgSurfaceLight,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
                                     color:
-                                        (localProductImageUrl?.isNotEmpty ??
-                                                false)
-                                            ? AppColors.success
+                                        productImageUrl.isNotEmpty
+                                            ? AppColors.success.withValues(
+                                              alpha: 0.3,
+                                            )
                                             : isDark
-                                            ? AppColors.textGrey
-                                            : AppColors.textDarkGrey,
+                                            ? const Color(0xFF2A3158)
+                                            : const Color(0xFFDDE0FF),
                                   ),
                                 ),
-                              ],
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      productImageUrl.isNotEmpty
+                                          ? Icons.check_circle_rounded
+                                          : Icons.camera_alt_rounded,
+                                      color:
+                                          productImageUrl.isNotEmpty
+                                              ? AppColors.success
+                                              : isDark
+                                              ? AppColors.textGrey
+                                              : AppColors.textDarkGrey,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      productImageUrl.isNotEmpty
+                                          ? (Lang.isSwahili
+                                              ? 'Picha imepakiwa ✓'
+                                              : 'Image uploaded ✓')
+                                          : (Lang.isSwahili
+                                              ? 'Pakia Picha ya Duka'
+                                              : 'Upload Shop Image'),
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color:
+                                            productImageUrl.isNotEmpty
+                                                ? AppColors.success
+                                                : isDark
+                                                ? AppColors.textGrey
+                                                : AppColors.textDarkGrey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color:
+                                isDark
+                                    ? AppColors.bgSurface
+                                    : AppColors.bgSurfaceLight,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color:
+                                  isDark
+                                      ? const Color(0xFF2A3158)
+                                      : const Color(0xFFDDE0FF),
+                              width: 1,
+                            ),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              isExpanded: true,
+                              value: selectedCategory,
+                              dropdownColor:
+                                  isDark
+                                      ? AppColors.bgCard
+                                      : AppColors.bgCardLight,
+                              items:
+                                  [
+                                        'Electronics',
+                                        'Clothing',
+                                        'Food',
+                                        'Beauty',
+                                        'Home',
+                                        'Sports',
+                                        'Other',
+                                      ]
+                                      .map(
+                                        (cat) => DropdownMenuItem(
+                                          value: cat,
+                                          child: Text(
+                                            cat,
+                                            style: GoogleFonts.poppins(
+                                              color:
+                                                  isDark
+                                                      ? AppColors.textWhite
+                                                      : AppColors.textDark,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                              onChanged:
+                                  (val) => setDialogState(
+                                    () => selectedCategory = val!,
+                                  ),
                             ),
                           ),
                         ),
@@ -1527,7 +1623,9 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                     ),
                     GestureDetector(
                       onTap: () async {
-                        if (nameController.text.isEmpty) return;
+                        if (nameController.text.isEmpty) {
+                          return;
+                        }
                         final shopId =
                             DateTime.now().millisecondsSinceEpoch.toString();
                         await _firestoreService.addShop(
@@ -1538,11 +1636,17 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                             category: selectedCategory,
                             location: locationController.text.trim(),
                             ownerId: _currentUserId ?? '',
+                            shopImage:
+                                productImageUrl.isNotEmpty
+                                    ? productImageUrl
+                                    : null,
                             status: 'pending',
                             createdAt: DateTime.now(),
                           ),
                         );
-                        if (!context.mounted) return;
+                        if (!context.mounted) {
+                          return;
+                        }
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -1592,7 +1696,7 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
     final descController = TextEditingController();
     final stockController = TextEditingController();
     String selectedCategory = 'Electronics';
-    String? productImageUrlLocal = '';
+    String productImageUrl = '';
 
     showDialog(
       context: context,
@@ -1607,7 +1711,10 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                   ),
                   title: Text(
                     Lang.isSwahili ? 'Ongeza Bidhaa' : 'Add Product',
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
+                    style: GoogleFonts.poppins(
+                      color: isDark ? AppColors.textWhite : AppColors.textDark,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   content: SingleChildScrollView(
                     child: Column(
@@ -1676,79 +1783,142 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                           ),
                         ),
                         const SizedBox(height: 12),
-
-                        // Image Upload for Product
-                        GestureDetector(
-                          onTap: () async {
-                            final file = await CloudinaryService.pickImage();
-                            if (file == null) return;
-                            final url = await CloudinaryService.uploadImage(
-                              file,
-                            );
-                            if (url != null) {
-                              setDialogState(() => productImageUrlLocal = url);
-                            }
-                          },
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            decoration: BoxDecoration(
-                              color:
-                                  (productImageUrlLocal?.isNotEmpty ?? false)
-                                      ? AppColors.success.withValues(alpha: 0.1)
-                                      : isDark
-                                      ? AppColors.bgSurface
-                                      : AppColors.bgSurfaceLight,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color:
-                                    (productImageUrlLocal?.isNotEmpty ?? false)
-                                        ? AppColors.success.withValues(
-                                          alpha: 0.3,
-                                        )
-                                        : isDark
-                                        ? const Color(0xFF2A3158)
-                                        : const Color(0xFFDDE0FF),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  (productImageUrlLocal?.isNotEmpty ?? false)
-                                      ? Icons.check_circle_rounded
-                                      : Icons.camera_alt_rounded,
-                                  color:
-                                      (productImageUrlLocal?.isNotEmpty ??
-                                              false)
-                                          ? AppColors.success
-                                          : isDark
-                                          ? AppColors.textGrey
-                                          : AppColors.textDarkGrey,
-                                  size: 18,
+                        // Product image upload
+                        StatefulBuilder(
+                          builder: (ctx2, setImgState) {
+                            return GestureDetector(
+                              onTap: () async {
+                                final file =
+                                    await CloudinaryService.pickImage();
+                                if (file == null) return;
+                                final url = await CloudinaryService.uploadImage(
+                                  file,
+                                );
+                                if (url != null)
+                                  setImgState(() => productImageUrl = url);
+                              },
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
                                 ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  (productImageUrlLocal?.isNotEmpty ?? false)
-                                      ? (Lang.isSwahili
-                                          ? 'Picha imepakiwa ✓'
-                                          : 'Image uploaded ✓')
-                                      : (Lang.isSwahili
-                                          ? 'Pakia Picha ya Bidhaa'
-                                          : 'Upload Product Image'),
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
+                                decoration: BoxDecoration(
+                                  color:
+                                      productImageUrl.isNotEmpty
+                                          ? AppColors.success.withValues(
+                                            alpha: 0.1,
+                                          )
+                                          : isDark
+                                          ? AppColors.bgSurface
+                                          : AppColors.bgSurfaceLight,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
                                     color:
-                                        (productImageUrlLocal?.isNotEmpty ??
-                                                false)
-                                            ? AppColors.success
+                                        productImageUrl.isNotEmpty
+                                            ? AppColors.success.withValues(
+                                              alpha: 0.3,
+                                            )
                                             : isDark
-                                            ? AppColors.textGrey
-                                            : AppColors.textDarkGrey,
+                                            ? const Color(0xFF2A3158)
+                                            : const Color(0xFFDDE0FF),
                                   ),
                                 ),
-                              ],
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      productImageUrl.isNotEmpty
+                                          ? Icons.check_circle_rounded
+                                          : Icons.camera_alt_rounded,
+                                      color:
+                                          productImageUrl.isNotEmpty
+                                              ? AppColors.success
+                                              : isDark
+                                              ? AppColors.textGrey
+                                              : AppColors.textDarkGrey,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      productImageUrl.isNotEmpty
+                                          ? (Lang.isSwahili
+                                              ? 'Picha imepakiwa ✓'
+                                              : 'Image uploaded ✓')
+                                          : (Lang.isSwahili
+                                              ? 'Pakia Picha ya Bidhaa'
+                                              : 'Upload Product Image'),
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color:
+                                            productImageUrl.isNotEmpty
+                                                ? AppColors.success
+                                                : isDark
+                                                ? AppColors.textGrey
+                                                : AppColors.textDarkGrey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color:
+                                isDark
+                                    ? AppColors.bgSurface
+                                    : AppColors.bgSurfaceLight,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color:
+                                  isDark
+                                      ? const Color(0xFF2A3158)
+                                      : const Color(0xFFDDE0FF),
+                              width: 1,
+                            ),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              isExpanded: true,
+                              value: selectedCategory,
+                              dropdownColor:
+                                  isDark
+                                      ? AppColors.bgCard
+                                      : AppColors.bgCardLight,
+                              items:
+                                  [
+                                        'Electronics',
+                                        'Clothing',
+                                        'Food',
+                                        'Beauty',
+                                        'Home',
+                                        'Sports',
+                                        'Other',
+                                      ]
+                                      .map(
+                                        (cat) => DropdownMenuItem(
+                                          value: cat,
+                                          child: Text(
+                                            cat,
+                                            style: GoogleFonts.poppins(
+                                              color:
+                                                  isDark
+                                                      ? AppColors.textWhite
+                                                      : AppColors.textDark,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                              onChanged:
+                                  (val) => setDialogState(
+                                    () => selectedCategory = val!,
+                                  ),
                             ),
                           ),
                         ),
@@ -1766,8 +1936,9 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                     GestureDetector(
                       onTap: () async {
                         if (nameController.text.isEmpty ||
-                            priceController.text.isEmpty)
+                            priceController.text.isEmpty) {
                           return;
+                        }
                         final productId =
                             DateTime.now().millisecondsSinceEpoch.toString();
                         await _firestoreService.addProduct(
@@ -1778,8 +1949,8 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                             description: descController.text.trim(),
                             price: double.tryParse(priceController.text) ?? 0,
                             productImage:
-                                productImageUrlLocal?.isNotEmpty == true
-                                    ? productImageUrlLocal
+                                productImageUrl.isNotEmpty
+                                    ? productImageUrl
                                     : null,
                             category: selectedCategory,
                             stock: int.tryParse(stockController.text) ?? 0,
@@ -1787,7 +1958,9 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> {
                             createdAt: DateTime.now(),
                           ),
                         );
-                        if (!context.mounted) return;
+                        if (!context.mounted) {
+                          return;
+                        }
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
