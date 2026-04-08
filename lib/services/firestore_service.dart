@@ -52,7 +52,6 @@ class FirestoreService {
     } catch (_) { return false; }
   }
 
-  // Delete shop AND all its products in one batch
   Future<bool> deleteShopCascade(String shopId) async {
     try {
       final products = await _db.collection('products')
@@ -243,23 +242,125 @@ class FirestoreService {
   }
 
   // ===== CHAT =====
+
+  /// Tuma ujumbe na uandike metadata kwenye chat doc (kwa lastMessage)
   Future<bool> sendMessage(ChatMessage message) async {
     try {
       final chatId = _chatId(message.senderId, message.receiverId);
-      await _db.collection('chats').doc(chatId)
-          .collection('messages').doc(message.messageId).set(message.toMap());
+      final chatRef = _db.collection('chats').doc(chatId);
+
+      // Hifadhi ujumbe
+      await chatRef
+          .collection('messages')
+          .doc(message.messageId)
+          .set(message.toMap());
+
+      // ✅ Andika/update metadata ya chat doc (lastMessage, unreadCount)
+      await chatRef.set({
+        'participants': [message.senderId, message.receiverId],
+        'lastMessage': message.message,
+        'lastMessageAt': Timestamp.fromDate(message.createdAt),
+        'lastSenderId': message.senderId,
+        // Increment unread count kwa receiver
+        'unread_${message.receiverId}': FieldValue.increment(1),
+      }, SetOptions(merge: true));
+
+      // ✅ Tuma in-app notification kwa receiver
+      await sendNotification(
+        userId: message.receiverId,
+        title: Lang.isSwahili ? 'Ujumbe Mpya' : 'New Message',
+        body: message.message.length > 60
+            ? '${message.message.substring(0, 60)}...'
+            : message.message,
+        type: 'chat_message',
+        referenceId: message.senderId,
+      );
+
       return true;
     } catch (_) { return false; }
   }
 
+  /// Stream ya messages — inamark kama read mara moja inapofunguliwa
   Stream<List<ChatMessage>> getMessages(String u1, String u2) {
     final chatId = _chatId(u1, u2);
-    return _db.collection('chats').doc(chatId).collection('messages')
-        .orderBy('createdAt').snapshots()
+    return _db
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .orderBy('createdAt') // ✅ Works properly now (Timestamp not String)
+        .snapshots()
         .map((s) => s.docs.map((d) => ChatMessage.fromMap(d.data())).toList());
   }
 
+  /// ✅ Stream ya unread count kwa mtumiaji fulani katika mazungumzo
+  Stream<int> getUnreadCount(String currentUserId, String otherUserId) {
+    final chatId = _chatId(currentUserId, otherUserId);
+    return _db.collection('chats').doc(chatId).snapshots().map((doc) {
+      if (!doc.exists) return 0;
+      final data = doc.data() ?? {};
+      return (data['unread_$currentUserId'] as int?) ?? 0;
+    });
+  }
+
+  /// ✅ Reset unread count baada ya kufungua chat
+  Future<void> resetUnreadCount(String currentUserId, String otherUserId) async {
+    try {
+      final chatId = _chatId(currentUserId, otherUserId);
+      await _db.collection('chats').doc(chatId).update({
+        'unread_$currentUserId': 0,
+      });
+    } catch (_) {}
+  }
+
   String _chatId(String u1, String u2) => ([u1, u2]..sort()).join('_');
+
+  /// ✅ Pata users wote waliowahi kuzungumza na admin (real chats only)
+  Stream<List<Map<String, dynamic>>> getAdminChatUsers() {
+    return _db
+        .collection('chats')
+        .where('participants', arrayContains: 'admin')
+        .orderBy('lastMessageAt', descending: true)
+        .snapshots()
+        .map((snap) => snap.docs.map((doc) => {'chatId': doc.id, ...doc.data()}).toList());
+  }
+
+  /// Pata mazungumzo yote ambayo admin anayo (legacy — kept for compatibility)
+  Stream<List<Map<String, dynamic>>> getAdminConversations() => getAdminChatUsers();
+
+  /// Pata ujumbe wa mwisho wa mazungumzo
+  Future<ChatMessage?> getLastMessage(String u1, String u2) async {
+    try {
+      final chatId = _chatId(u1, u2);
+      final snap = await _db
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .orderBy('createdAt', descending: true)
+          .limit(1)
+          .get();
+      if (snap.docs.isEmpty) return null;
+      return ChatMessage.fromMap(snap.docs.first.data());
+    } catch (_) { return null; }
+  }
+
+  /// Mark all messages from a user as read
+  Future<void> markMessagesRead(String senderId, String receiverId) async {
+    try {
+      final chatId = _chatId(senderId, receiverId);
+      final snap = await _db
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .where('senderId', isEqualTo: senderId)
+          .where('isRead', isEqualTo: false)
+          .get();
+      final batch = _db.batch();
+      for (final doc in snap.docs) {
+        batch.update(doc.reference, {'isRead': true});
+      }
+      await batch.commit();
+    } catch (_) {}
+  }
 
   // ===== NOTIFICATIONS =====
   Future<bool> sendNotification({

@@ -8,6 +8,7 @@ import '../../models/shop_model.dart';
 import '../../models/order_model.dart';
 import '../../models/user_model.dart';
 import '../notifications/notifications_screen.dart';
+import 'admin_chats_screen.dart';
 
 class AdminHome extends StatefulWidget {
   const AdminHome({super.key});
@@ -271,6 +272,85 @@ class _AdminHomeState extends State<AdminHome> {
             onTap: () => setState(() => _selectedIndex = 4),
             fullWidth: true,
           ),
+          const SizedBox(height: 14),
+
+          // Mazungumzo Yote — Inbox ya admin
+          GestureDetector(
+            onTap:
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AdminChatsScreen()),
+                ),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF6C63FF), Color(0xFFFF6B35)],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF6C63FF).withValues(alpha: 0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.chat_bubble_rounded,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          Lang.isSwahili
+                              ? 'Mazungumzo Yote'
+                              : 'All Conversations',
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          Lang.isSwahili
+                              ? 'Zungumza na customers, maduka, wasafirishaji'
+                              : 'Chat with customers, shops & delivery',
+                          style: GoogleFonts.poppins(
+                            fontSize: 11,
+                            color: Colors.white.withValues(alpha: 0.85),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
           const SizedBox(height: 24),
           Text(
             Lang.isSwahili ? 'Maagizo ya Hivi Karibuni' : 'Recent Orders',
@@ -543,7 +623,6 @@ class _AdminHomeState extends State<AdminHome> {
                   ? data
                       .where(
                         (item) =>
-                            item.status == filterStatus ||
                             item.orderStatus == filterStatus,
                       )
                       .length
@@ -776,7 +855,29 @@ class _AdminHomeState extends State<AdminHome> {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
+          // ✅ Jina na simu ya mteja
+          if (order.customerName.isNotEmpty || order.customerPhone.isNotEmpty)
+            Row(
+              children: [
+                const Icon(Icons.person_outline, color: AppColors.primary, size: 14),
+                const SizedBox(width: 6),
+                Text(
+                  order.customerName.isNotEmpty ? order.customerName : 'Customer',
+                  style: GoogleFonts.poppins(fontSize: 12, color: AppColors.textWhite, fontWeight: FontWeight.w600),
+                ),
+                if (order.customerPhone.isNotEmpty) ...[ 
+                  const SizedBox(width: 8),
+                  const Icon(Icons.phone_outlined, color: AppColors.textGrey, size: 13),
+                  const SizedBox(width: 4),
+                  Text(
+                    order.customerPhone,
+                    style: GoogleFonts.poppins(fontSize: 12, color: AppColors.textGrey),
+                  ),
+                ],
+              ],
+            ),
+          const SizedBox(height: 6),
           Row(
             children: [
               const Icon(
@@ -1056,6 +1157,30 @@ class _AdminHomeState extends State<AdminHome> {
             ],
           ),
           const SizedBox(height: 4),
+          // ✅ Jina na simu ya mteja
+          if (order.customerName.isNotEmpty || order.customerPhone.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                children: [
+                  const Icon(Icons.person_outline, color: AppColors.primary, size: 14),
+                  const SizedBox(width: 6),
+                  Text(
+                    order.customerName.isNotEmpty ? order.customerName : 'Customer',
+                    style: GoogleFonts.poppins(fontSize: 12, color: AppColors.textWhite, fontWeight: FontWeight.w600),
+                  ),
+                  if (order.customerPhone.isNotEmpty) ...[
+                    const SizedBox(width: 8),
+                    const Icon(Icons.phone_outlined, color: AppColors.success, size: 13),
+                    const SizedBox(width: 4),
+                    Text(
+                      order.customerPhone,
+                      style: GoogleFonts.poppins(fontSize: 12, color: AppColors.success, fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           Row(
             children: [
               const Icon(

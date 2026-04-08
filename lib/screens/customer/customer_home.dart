@@ -20,6 +20,7 @@ import '../shared/shop_detail_screen.dart';
 import '../shared/help_support_screen.dart';
 import '../shared/about_screen.dart';
 import '../shared/delivery_address_screen.dart';
+import '../chat/chat_screen.dart';
 
 class CustomerHome extends StatefulWidget {
   const CustomerHome({super.key});
@@ -230,6 +231,53 @@ class _CustomerHomeState extends State<CustomerHome>
         ),
       ),
       bottomNavigationBar: _buildBottomNav(isDark, cartService),
+      floatingActionButton: (_selectedIndex == 0 || _selectedIndex == 1)
+          ? GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ChatScreen(
+                    receiverId: 'admin',
+                    receiverName: 'ZenjShop Admin',
+                    receiverRole: Lang.isSwahili ? 'Msimamizi wa App' : 'App Administrator',
+                  ),
+                ),
+              ),
+              child: Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primary, AppColors.secondary],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.45),
+                      blurRadius: 18,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    const Icon(Icons.chat_rounded, color: Colors.white, size: 26),
+                    // Unread badge
+                    StreamBuilder<int>(
+                      stream: _firestoreService.getUnreadNotificationsCount(
+                          _authService.currentUser?.uid ?? ''),
+                      builder: (context, snap) {
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : null,
     );
   }
 
@@ -2206,6 +2254,26 @@ class _CustomerHomeState extends State<CustomerHome>
                       color: AppColors.primary,
                       size: 16,
                     ),
+                  ),
+                ),
+                // ✅ Chat na Admin
+                GestureDetector(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChatScreen(
+                        receiverId: 'admin',
+                        receiverName: 'ZenjShop Admin',
+                        receiverRole: Lang.isSwahili ? 'Msimamizi wa App' : 'App Administrator',
+                      ),
+                    ),
+                  ),
+                  child: _settingsTile(
+                    isDark,
+                    Icons.chat_rounded,
+                    Lang.isSwahili ? 'Zungumza na Admin' : 'Chat with Admin',
+                    Lang.isSwahili ? 'Maswali, malalamiko, msaada' : 'Questions, complaints, support',
+                    const Icon(Icons.arrow_forward_ios_rounded, color: AppColors.primary, size: 16),
                   ),
                 ),
                 GestureDetector(

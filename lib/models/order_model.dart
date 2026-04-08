@@ -1,20 +1,23 @@
 class OrderModel {
   final String orderId;
   final String customerId;
+  final String customerName;   // ✅ Mpya
+  final String customerPhone;  // ✅ Mpya
   final String shopId;
   final String? deliveryPersonId;
   final List<Map<String, dynamic>> items;
   final double totalAmount;
-  final String paymentMethod; // 'mpesa', 'tigo', 'airtel'
-  final String paymentStatus; // 'pending', 'paid'
-  final String
-  orderStatus; // 'pending', 'confirmed', 'preparing', 'picked_up', 'delivered'
+  final String paymentMethod;
+  final String paymentStatus;
+  final String orderStatus;
   final String deliveryAddress;
   final DateTime createdAt;
 
   OrderModel({
     required this.orderId,
     required this.customerId,
+    this.customerName = '',   // ✅ Default tupu (backwards compatible)
+    this.customerPhone = '',  // ✅ Default tupu (backwards compatible)
     required this.shopId,
     this.deliveryPersonId,
     required this.items,
@@ -30,6 +33,8 @@ class OrderModel {
     return {
       'orderId': orderId,
       'customerId': customerId,
+      'customerName': customerName,
+      'customerPhone': customerPhone,
       'shopId': shopId,
       'deliveryPersonId': deliveryPersonId,
       'items': items,
@@ -44,16 +49,18 @@ class OrderModel {
 
   factory OrderModel.fromMap(Map<String, dynamic> map) {
     return OrderModel(
-      orderId: map['orderId'],
-      customerId: map['customerId'],
-      shopId: map['shopId'],
+      orderId: map['orderId'] ?? '',
+      customerId: map['customerId'] ?? '',
+      customerName: map['customerName'] ?? '',   // ✅ backwards compatible
+      customerPhone: map['customerPhone'] ?? '', // ✅ backwards compatible
+      shopId: map['shopId'] ?? '',
       deliveryPersonId: map['deliveryPersonId'],
-      items: List<Map<String, dynamic>>.from(map['items']),
-      totalAmount: map['totalAmount'].toDouble(),
-      paymentMethod: map['paymentMethod'],
-      paymentStatus: map['paymentStatus'],
-      orderStatus: map['orderStatus'],
-      deliveryAddress: map['deliveryAddress'],
+      items: List<Map<String, dynamic>>.from(map['items'] ?? []),
+      totalAmount: (map['totalAmount'] ?? 0).toDouble(),
+      paymentMethod: map['paymentMethod'] ?? '',
+      paymentStatus: map['paymentStatus'] ?? '',
+      orderStatus: map['orderStatus'] ?? '',
+      deliveryAddress: map['deliveryAddress'] ?? '',
       createdAt: DateTime.parse(map['createdAt']),
     );
   }

@@ -83,6 +83,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final customerId = _authService.currentUser?.uid ?? '';
     final address = _addressController.text.trim();
 
+    // ✅ Pata jina na simu ya mteja
+    String customerName = '';
+    String customerPhone = '';
+    try {
+      final userData = await _firestoreService.getUserData(customerId);
+      if (userData != null) {
+        customerName = userData.name;
+        customerPhone = userData.phone;
+      }
+    } catch (_) {}
+
     // Group items by shop
     final Map<String, List<CartItem>> byShop = {};
     for (final item in cartService.items) {
@@ -101,6 +112,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       final order = OrderModel(
         orderId: orderId.length > 20 ? orderId.substring(0, 20) : orderId,
         customerId: customerId,
+        customerName: customerName,   // ✅
+        customerPhone: customerPhone, // ✅
         shopId: shopId,
         items:
             shopItems

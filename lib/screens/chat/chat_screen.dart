@@ -12,11 +12,14 @@ class ChatScreen extends StatefulWidget {
   final String receiverName;
   final String receiverRole;
 
+  final String? senderOverride; // ✅ Admin uses 'admin' instead of Firebase UID
+
   const ChatScreen({
     super.key,
     required this.receiverId,
     required this.receiverName,
     required this.receiverRole,
+    this.senderOverride,
   });
 
   @override
@@ -33,7 +36,13 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    _currentUserId = _authService.currentUser?.uid;
+    // ✅ Kama senderOverride imetolewa (admin), tumia hiyo badala ya Firebase UID
+    _currentUserId = widget.senderOverride ?? _authService.currentUser?.uid;
+    // ✅ Reset unread count na mark messages as read mara screen inafunguliwa
+    if (_currentUserId != null) {
+      _firestoreService.resetUnreadCount(_currentUserId!, widget.receiverId);
+      _firestoreService.markMessagesRead(widget.receiverId, _currentUserId!);
+    }
   }
 
   @override
@@ -175,20 +184,14 @@ class _ChatScreenState extends State<ChatScreen> {
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color:
-                                isDark
-                                    ? AppColors.textWhite
-                                    : AppColors.textDark,
+                            color: isDark ? AppColors.textWhite : AppColors.textDark,
                           ),
                         ),
                         Text(
                           'Say hello to ${widget.receiverName}!',
                           style: GoogleFonts.poppins(
                             fontSize: 13,
-                            color:
-                                isDark
-                                    ? AppColors.textGrey
-                                    : AppColors.textDarkGrey,
+                            color: isDark ? AppColors.textGrey : AppColors.textDarkGrey,
                           ),
                         ),
                       ],
@@ -197,6 +200,16 @@ class _ChatScreenState extends State<ChatScreen> {
                 }
 
                 final messages = snapshot.data!;
+                // ✅ Auto scroll hadi chini wakati messages mpya zinakuja
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (_scrollController.hasClients) {
+                    _scrollController.animateTo(
+                      _scrollController.position.maxScrollExtent,
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOut,
+                    );
+                  }
+                });
                 return ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.all(16),
@@ -217,10 +230,7 @@ class _ChatScreenState extends State<ChatScreen> {
               color: isDark ? AppColors.bgCard : AppColors.bgCardLight,
               border: Border(
                 top: BorderSide(
-                  color:
-                      isDark
-                          ? const Color(0xFF2A3158)
-                          : const Color(0xFFDDE0FF),
+                  color: isDark ? const Color(0xFF2A3158) : const Color(0xFFDDE0FF),
                   width: 1,
                 ),
               ),
@@ -230,33 +240,23 @@ class _ChatScreenState extends State<ChatScreen> {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color:
-                          isDark
-                              ? AppColors.bgSurface
-                              : AppColors.bgSurfaceLight,
+                      color: isDark ? AppColors.bgSurface : AppColors.bgSurfaceLight,
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color:
-                            isDark
-                                ? const Color(0xFF2A3158)
-                                : const Color(0xFFDDE0FF),
+                        color: isDark ? const Color(0xFF2A3158) : const Color(0xFFDDE0FF),
                         width: 1,
                       ),
                     ),
                     child: TextField(
                       controller: _messageController,
                       style: GoogleFonts.poppins(
-                        color:
-                            isDark ? AppColors.textWhite : AppColors.textDark,
+                        color: isDark ? AppColors.textWhite : AppColors.textDark,
                         fontSize: 14,
                       ),
                       decoration: InputDecoration(
                         hintText: 'Type a message...',
                         hintStyle: GoogleFonts.poppins(
-                          color:
-                              isDark
-                                  ? AppColors.textGrey
-                                  : AppColors.textDarkGrey,
+                          color: isDark ? AppColors.textGrey : AppColors.textDarkGrey,
                           fontSize: 14,
                         ),
                         border: InputBorder.none,
@@ -307,8 +307,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
-        mainAxisAlignment:
-            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe) ...[
@@ -339,10 +338,9 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
               gradient: isMe ? AppColors.primaryGradient : null,
-              color:
-                  isMe
-                      ? null
-                      : isDark
+              color: isMe
+                  ? null
+                  : isDark
                       ? AppColors.bgCard
                       : AppColors.bgCardLight,
               borderRadius: BorderRadius.only(
@@ -351,22 +349,19 @@ class _ChatScreenState extends State<ChatScreen> {
                 bottomLeft: Radius.circular(isMe ? 18 : 4),
                 bottomRight: Radius.circular(isMe ? 4 : 18),
               ),
-              border:
-                  isMe
-                      ? null
-                      : Border.all(
-                        color:
-                            isDark
-                                ? const Color(0xFF2A3158)
-                                : const Color(0xFFDDE0FF),
-                        width: 1,
-                      ),
+              border: isMe
+                  ? null
+                  : Border.all(
+                      color: isDark
+                          ? const Color(0xFF2A3158)
+                          : const Color(0xFFDDE0FF),
+                      width: 1,
+                    ),
               boxShadow: [
                 BoxShadow(
-                  color:
-                      isMe
-                          ? AppColors.primary.withValues(alpha: 0.2)
-                          : Colors.black.withValues(alpha: 0.05),
+                  color: isMe
+                      ? AppColors.primary.withValues(alpha: 0.2)
+                      : Colors.black.withValues(alpha: 0.05),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -379,26 +374,40 @@ class _ChatScreenState extends State<ChatScreen> {
                   msg.message,
                   style: GoogleFonts.poppins(
                     fontSize: 14,
-                    color:
-                        isMe
-                            ? Colors.white
-                            : isDark
+                    color: isMe
+                        ? Colors.white
+                        : isDark
                             ? AppColors.textWhite
                             : AppColors.textDark,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  '${msg.createdAt.hour}:${msg.createdAt.minute.toString().padLeft(2, '0')}',
-                  style: GoogleFonts.poppins(
-                    fontSize: 10,
-                    color:
-                        isMe
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${msg.createdAt.hour}:${msg.createdAt.minute.toString().padLeft(2, '0')}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 10,
+                        color: isMe
                             ? Colors.white.withValues(alpha: 0.7)
                             : isDark
-                            ? AppColors.textGrey
-                            : AppColors.textDarkGrey,
-                  ),
+                                ? AppColors.textGrey
+                                : AppColors.textDarkGrey,
+                      ),
+                    ),
+                    // ✅ Read receipt icon (double tick)
+                    if (isMe) ...[
+                      const SizedBox(width: 4),
+                      Icon(
+                        msg.isRead ? Icons.done_all : Icons.done,
+                        size: 12,
+                        color: msg.isRead
+                            ? Colors.lightBlueAccent
+                            : Colors.white.withValues(alpha: 0.7),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
