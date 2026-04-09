@@ -265,12 +265,35 @@ class _CustomerHomeState extends State<CustomerHome>
                   alignment: Alignment.center,
                   children: [
                     const Icon(Icons.chat_rounded, color: Colors.white, size: 26),
-                    // Unread badge
+                    // ✅ Unread badge - messages from admin
                     StreamBuilder<int>(
-                      stream: _firestoreService.getUnreadNotificationsCount(
-                          _authService.currentUser?.uid ?? ''),
+                      stream: _firestoreService.getUnreadCount(
+                          _authService.currentUser?.uid ?? '', 'admin'),
                       builder: (context, snap) {
-                        return const SizedBox.shrink();
+                        final count = snap.data ?? 0;
+                        if (count == 0) return const SizedBox.shrink();
+                        return Positioned(
+                          top: 0,
+                          right: 0,
+                          child: Container(
+                            width: 18,
+                            height: 18,
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Text(
+                                count > 9 ? '9+' : '$count',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
                       },
                     ),
                   ],

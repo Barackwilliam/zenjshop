@@ -126,18 +126,37 @@ class _AdminHomeState extends State<AdminHome> {
               ),
               Row(
                 children: [
-                  GestureDetector(
-                    onTap:
-                        () => Navigator.push(
+                  StreamBuilder<int>(
+                    stream: _firestoreService.getMergedUnreadCount(_authService.currentUser?.uid ?? ''),
+                    builder: (context, snap) {
+                      final count = snap.data ?? 0;
+                      return GestureDetector(
+                        onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) => const NotificationsScreen(),
-                          ),
+                          MaterialPageRoute(builder: (_) => const NotificationsScreen()),
                         ),
-                    child: _iconBtn(
-                      Icons.notifications_outlined,
-                      AppColors.textGrey,
-                    ),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            _iconBtn(Icons.notifications_outlined, AppColors.textGrey),
+                            if (count > 0)
+                              Positioned(
+                                top: -2, right: -2,
+                                child: Container(
+                                  width: 16, height: 16,
+                                  decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle),
+                                  child: Center(
+                                    child: Text(
+                                      count > 9 ? '9+' : '$count',
+                                      style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w800),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(width: 10),
                   GestureDetector(
@@ -364,10 +383,11 @@ class _AdminHomeState extends State<AdminHome> {
           StreamBuilder(
             stream: _firestoreService.getAllOrders(),
             builder: (context, snapshot) {
-              if (!snapshot.hasData || snapshot.data!.isEmpty)
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return _buildEmptyState(
                   Lang.isSwahili ? 'Hakuna maagizo bado' : 'No orders yet',
                 );
+              }
               final orders = snapshot.data!.take(5).toList();
               return Column(
                 children: orders.map((o) => _buildOrderTile(o)).toList(),
@@ -430,14 +450,16 @@ class _AdminHomeState extends State<AdminHome> {
           child: StreamBuilder(
             stream: _firestoreService.getAllShops(),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting)
+              if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
                   child: CircularProgressIndicator(color: AppColors.primary),
                 );
-              if (!snapshot.hasData || snapshot.data!.isEmpty)
+              }
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return _buildEmptyState(
                   Lang.isSwahili ? 'Hakuna maduka bado' : 'No shops yet',
                 );
+              }
               return ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 itemCount: snapshot.data!.length,
@@ -469,14 +491,16 @@ class _AdminHomeState extends State<AdminHome> {
           child: StreamBuilder(
             stream: _firestoreService.getAllOrders(),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting)
+              if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
                   child: CircularProgressIndicator(color: AppColors.primary),
                 );
-              if (!snapshot.hasData || snapshot.data!.isEmpty)
+              }
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return _buildEmptyState(
                   Lang.isSwahili ? 'Hakuna maagizo bado' : 'No orders yet',
                 );
+              }
               return ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 itemCount: snapshot.data!.length,
@@ -508,16 +532,18 @@ class _AdminHomeState extends State<AdminHome> {
           child: StreamBuilder<List<OrderModel>>(
             stream: _firestoreService.getAllOrders(),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting)
+              if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
                   child: CircularProgressIndicator(color: AppColors.primary),
                 );
-              if (!snapshot.hasData || snapshot.data!.isEmpty)
+              }
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return _buildEmptyState(
                   Lang.isSwahili
                       ? 'Hakuna deliveries bado'
                       : 'No deliveries yet',
                 );
+              }
               final active =
                   snapshot.data!
                       .where(
@@ -528,13 +554,13 @@ class _AdminHomeState extends State<AdminHome> {
                             o.orderStatus == 'delivered',
                       )
                       .toList();
-              if (active.isEmpty)
+              if (active.isEmpty) {
                 return _buildEmptyState(
                   Lang.isSwahili
                       ? 'Hakuna deliveries zinazoendelea'
                       : 'No active deliveries',
                 );
-              return ListView.builder(
+              }              return ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 itemCount: active.length,
                 itemBuilder: (_, i) => _buildDeliveryOrderCard(active[i]),
@@ -565,14 +591,16 @@ class _AdminHomeState extends State<AdminHome> {
           child: StreamBuilder<List<UserModel>>(
             stream: _firestoreService.getAllUsers(),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting)
+              if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
                   child: CircularProgressIndicator(color: AppColors.primary),
                 );
-              if (!snapshot.hasData || snapshot.data!.isEmpty)
+              }
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return _buildEmptyState(
                   Lang.isSwahili ? 'Hakuna watumiaji' : 'No users found',
                 );
+              }
               // Sort: admins first, then shop_owner, delivery, customer
               final users = snapshot.data!;
               users.sort((a, b) {
@@ -1497,7 +1525,7 @@ class _AdminHomeState extends State<AdminHome> {
                   await _firestoreService.deleteShopCascade(shop.shopId);
                   if (!ctx.mounted) return;
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
                         Lang.isSwahili ? 'Duka limefutwa!' : 'Shop deleted!',
@@ -1582,7 +1610,7 @@ class _AdminHomeState extends State<AdminHome> {
                   }
                   if (!ctx.mounted) return;
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
                         Lang.isSwahili ? 'Mtumiaji amefutwa!' : 'User deleted!',

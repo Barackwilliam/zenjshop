@@ -792,13 +792,12 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> with ConnectivityMixin {
               if (file == null) {
                 return;
               }
+              final messenger = ScaffoldMessenger.of(context);
               final url = await CloudinaryService.uploadImage(file);
               if (url != null) {
                 await _firestoreService.updateShopImage(shop.shopId, url);
-                if (!context.mounted) {
-                  return;
-                }
-                ScaffoldMessenger.of(context).showSnackBar(
+                if (!context.mounted) return;
+                messenger.showSnackBar(
                   SnackBar(
                     content: Text(
                       Lang.isSwahili
@@ -1794,8 +1793,9 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> with ConnectivityMixin {
                                 final url = await CloudinaryService.uploadImage(
                                   file,
                                 );
-                                if (url != null)
+                                if (url != null) {
                                   setImgState(() => productImageUrl = url);
+                                }
                               },
                               child: Container(
                                 width: double.infinity,

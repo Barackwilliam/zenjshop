@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/shop_model.dart';
 import '../models/product_model.dart';
@@ -316,12 +317,25 @@ class FirestoreService {
 
   /// ✅ Pata users wote waliowahi kuzungumza na admin (real chats only)
   Stream<List<Map<String, dynamic>>> getAdminChatUsers() {
+    // ✅ No orderBy — avoids requiring composite Firestore index
+    // Sorting is done in Dart after fetching
     return _db
         .collection('chats')
         .where('participants', arrayContains: 'admin')
-        .orderBy('lastMessageAt', descending: true)
         .snapshots()
-        .map((snap) => snap.docs.map((doc) => {'chatId': doc.id, ...doc.data()}).toList());
+        .map((snap) {
+          final docs = snap.docs.map((doc) => {'chatId': doc.id, ...doc.data()}).toList();
+          // Sort by lastMessageAt descending in Dart
+          docs.sort((a, b) {
+            final aTime = a['lastMessageAt'];
+            final bTime = b['lastMessageAt'];
+            if (aTime == null && bTime == null) return 0;
+            if (aTime == null) return 1;
+            if (bTime == null) return -1;
+            return (bTime as dynamic).compareTo(aTime as dynamic);
+          });
+          return docs;
+        });
   }
 
   /// Pata mazungumzo yote ambayo admin anayo (legacy — kept for compatibility)
@@ -388,6 +402,84 @@ class FirestoreService {
             list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
             return list;
           });
+
+  /// ✅ Merge notifications kwa Firebase UID na 'admin' — kwa admin users
+  Stream<List<NotificationModel>> getMergedNotifications(String userId) {
+    if (userId.isEmpty) return Stream.value([]);
+    // Tumia StreamController kuunganisha streams mbili
+    late StreamController<List<NotificationModel>> controller;
+    List<NotificationModel> list1 = [];
+    List<NotificationModel> list2 = [];
+    StreamSubscription? sub1, sub2;
+
+    void emit() {
+      final merged = [...list1, ...list2];
+      final seen = <String>{};
+      final unique = merged.where((n) => seen.add(n.notificationId)).toList();
+      unique.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      if (!controller.isClosed) controller.add(unique);
+    }
+
+    controller = StreamController<List<NotificationModel>>(
+      onListen: () {
+        sub1 = getUserNotifications(userId).listen((data) { list1 = data; emit(); });
+        sub2 = getUserNotifications('admin').listen((data) { list2 = data; emit(); });
+      },
+      onCancel: () { sub1?.cancel(); sub2?.cancel(); },
+    );
+    return controller.stream;
+  }
+
+  /// ✅ Unread notifications count kwa admin — inajumlisha real UID + 'admin'
+  Stream<int> getMergedUnreadCount(String userId) {
+    late StreamController<int> controller;
+    int count1 = 0, count2 = 0;
+    StreamSubscription? sub1, sub2;
+
+    controller = StreamController<int>(
+      onListen: () {
+        sub1 = getUnreadNotificationsCount(userId).listen((c) { count1 = c; if (!controller.isClosed) controller.add(count1 + count2); });
+        sub2 = getUnreadNotificationsCount('admin').listen((c) { count2 = c; if (!controller.isClosed) controller.add(count1 + count2); });
+      },
+      onCancel: () { sub1?.cancel(); sub2?.cancel(); },
+    );
+    return controller.stream;
+  }
+
+  // ✅ Futa notification moja
+  Future<bool> deleteNotification(String notificationId) async {
+    try {
+      await _db.collection('notifications').doc(notificationId).delete();
+      return true;
+    } catch (_) { return false; }
+  }
+
+  // ✅ Futa notifications ZOTE za user
+  Future<bool> deleteAllNotifications(String userId) async {
+    try {
+      final batch = _db.batch();
+      // Futa za real UID
+      final snap1 = await _db.collection('notifications')
+          .where('userId', isEqualTo: userId).get();
+      for (final doc in snap1.docs) { batch.delete(doc.reference); }
+      // Kama ni admin, futa pia za 'admin'
+      final snap2 = await _db.collection('notifications')
+          .where('userId', isEqualTo: 'admin').get();
+      for (final doc in snap2.docs) { batch.delete(doc.reference); }
+      await batch.commit();
+      return true;
+    } catch (_) { return false; }
+  }
+
+  // ✅ Futa message moja ndani ya chat
+  Future<bool> deleteMessage(String senderId, String receiverId, String messageId) async {
+    try {
+      final chatId = _chatId(senderId, receiverId);
+      await _db.collection('chats').doc(chatId)
+          .collection('messages').doc(messageId).delete();
+      return true;
+    } catch (_) { return false; }
+  }
 
   Future<bool> markNotificationRead(String id) async {
     try {

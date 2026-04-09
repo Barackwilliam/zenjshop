@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../config/app_theme.dart';
@@ -36,6 +37,19 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     {'q': 'Ninawezaje kufungua duka?', 'a': 'Jisajili kama Mwenye Duka, kisha wasilisha duka lako kwa idhini ya admin. Baada ya kuidhinishwa, unaweza kuanza kuongeza bidhaa.'},
     {'q': 'Ninawezaje kupakia picha za bidhaa?', 'a': 'Katika Mwenye Duka → Maduka Yangu → Ongeza Bidhaa, bonyeza ikoni ya kamera kupakia kutoka kwenye gallery yako.'},
   ];
+
+  Future<void> _launchWhatsApp() async {
+    // ✅ Fungua WhatsApp moja kwa moja
+    const phone = '255772997018'; // Bila + au nafasi
+    const message = 'Habari! Ninahitaji msaada na ZenjShop.';
+    final uri = Uri.parse('https://wa.me/$phone?text=${Uri.encodeComponent(message)}');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      // Fallback: nakili namba
+      await Clipboard.setData(const ClipboardData(text: '+255 772 997 018'));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,23 +107,14 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
         Text(Lang.isSwahili ? 'Tuko hapa kukusaidia 24/7' : 'We\'re here to help you 24/7',
           style: GoogleFonts.poppins(fontSize: 12, color: Colors.white70)),
         const SizedBox(height: 20),
-        _buildContactItem(Icons.phone_rounded, 'WhatsApp', '+255 XXX XXX XXX', isDark: false, onTap: null),
+        _buildContactItem(Icons.phone_rounded, 'WhatsApp', '+255 772 997 018', isDark: false, onTap: _launchWhatsApp),
         const SizedBox(height: 12),
         _buildContactItem(Icons.email_rounded, 'Email', 'support@zenjshop.co.tz', isDark: false, onTap: null),
         const SizedBox(height: 12),
         _buildContactItem(Icons.location_on_rounded, Lang.isSwahili ? 'Ofisi' : 'Office', 'Dar es Salaam, Tanzania', isDark: false, onTap: null),
         const SizedBox(height: 16),
         GestureDetector(
-          onTap: () {
-            Clipboard.setData(const ClipboardData(text: '+255 XXX XXX XXX'));
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(Lang.isSwahili ? 'Namba imenakiliwa!' : 'Number copied!',
-                style: GoogleFonts.poppins(fontSize: 13)),
-              backgroundColor: AppColors.success, behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              margin: const EdgeInsets.all(16),
-            ));
-          },
+          onTap: _launchWhatsApp,
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 14),
@@ -128,7 +133,9 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
   }
 
   Widget _buildContactItem(IconData icon, String label, String value, {required bool isDark, VoidCallback? onTap}) {
-    return Row(children: [
+    return GestureDetector(
+      onTap: onTap,
+      child: Row(children: [
       Container(width: 36, height: 36,
         decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(10)),
         child: Icon(icon, color: Colors.white, size: 18)),
@@ -137,7 +144,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
         Text(label, style: GoogleFonts.poppins(fontSize: 11, color: Colors.white70)),
         Text(value, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
       ]),
-    ]);
+    ]),
+    );
   }
 
   Widget _buildFaqTile(int index, Map<String, String> faq, bool isDark) {
