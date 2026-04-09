@@ -788,11 +788,11 @@ class _ShopOwnerHomeState extends State<ShopOwnerHome> with ConnectivityMixin {
           // Upload shop image button
           GestureDetector(
             onTap: () async {
+              final messenger = ScaffoldMessenger.of(context);
               final file = await CloudinaryService.pickImage();
               if (file == null) {
                 return;
               }
-              final messenger = ScaffoldMessenger.of(context);
               final url = await CloudinaryService.uploadImage(file);
               if (url != null) {
                 await _firestoreService.updateShopImage(shop.shopId, url);
